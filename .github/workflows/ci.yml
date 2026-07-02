@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ── Lint ──────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+
+  # ── Type Check ────────────────────────────────────────────────────────────
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run type-check
+
+  # ── Unit Tests ────────────────────────────────────────────────────────────
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+  # ── Build ─────────────────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint, type-check, test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - name: Create env file for build
+        run: |
+          echo "APP_NAME=TrusonHub Job Searcher" >> .env
+          echo "APP_ENV=development" >> .env
+          echo "PORT=5000" >> .env
+          echo "CLIENT_URL=http://localhost:5173" >> .env
+          echo "SERVER_URL=http://localhost:5000" >> .env
+          echo "MONGODB_URI=mongodb://localhost:27017/trusonhub_ci" >> .env
+          echo "MONGODB_DB_NAME=trusonhub_ci" >> .env
+          echo "JWT_ACCESS_SECRET=ci-access-secret-placeholder" >> .env
+          echo "JWT_REFRESH_SECRET=ci-refresh-secret-placeholder" >> .env
+          echo "REDIS_URL=redis://localhost:6379" >> .env
+          echo "VITE_API_URL=http://localhost:5001" >> .env
+      - run: npm run build:client
+      - uses: actions/upload-artifact@v4
+        with:
+          name: client-build
+          path: dist/client/
+          retention-days: 7
+
+  # ── E2E Tests (on PRs only) ───────────────────────────────────────────────
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Create env file
+        run: |
+          echo "APP_NAME=TrusonHub Job Searcher" >> .env
+          echo "APP_ENV=development" >> .env
+          echo "PORT=5000" >> .env
+          echo "CLIENT_URL=http://localhost:5173" >> .env
+          echo "SERVER_URL=http://localhost:5000" >> .env
+          echo "MONGODB_URI=mongodb://localhost:27017/trusonhub_ci" >> .env
+          echo "JWT_ACCESS_SECRET=ci-access-secret-placeholder" >> .env
+          echo "JWT_REFRESH_SECRET=ci-refresh-secret-placeholder" >> .env
+          echo "REDIS_URL=redis://localhost:6379" >> .env
+          echo "VITE_API_URL=http://localhost:5001" >> .env
+      - run: npm run test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:5175
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

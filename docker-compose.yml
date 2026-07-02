@@ -1,0 +1,86 @@
+services:
+  # ── API Server (Node/Express) ───────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: server-prod
+    container_name: trusonhub_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/trusonhub_dev
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "5000:5000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - trusonhub_net
+    volumes:
+      - ./logs:/app/logs
+
+  # ── MongoDB ─────────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7-jammy
+    container_name: trusonhub_mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    networks:
+      - trusonhub_net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Redis ────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: trusonhub_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - trusonhub_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ── Nginx (reverse proxy + static client) ────────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: trusonhub_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./dist/client:/usr/share/nginx/html:ro
+    depends_on:
+      - api
+    networks:
+      - trusonhub_net
+
+networks:
+  trusonhub_net:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  mongo_config:
+  redis_data:

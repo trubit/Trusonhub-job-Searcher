@@ -1,0 +1,45 @@
+# ─── OS & Editor ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.idea/
+.vscode/settings.json
+
+# ─── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+
+# ─── Build Outputs ────────────────────────────────────────────────────────────
+dist/
+build/
+
+# ── Environment Files ─────────────────────────────────────────────────────────
+# All .env files are gitignored — use .env.example from Git history as a reference
+.env
+.env.*
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Testing ─────────────────────────────────────────────────────────────────
+coverage/
+playwright-report/
+test-results/
+.playwright/
+
+# ─── TypeScript ───────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+.dockerignore
+
+# ─── Misc ─────────────────────────────────────────────────────────────────────
+*.pem
+.nyc_output
