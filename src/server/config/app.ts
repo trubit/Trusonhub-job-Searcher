@@ -5,10 +5,13 @@ import { createRequestLogger } from '../middleware/requestLogger.js';
 import { globalErrorHandler, notFoundHandler } from '../middleware/errorHandler.js';
 import healthRouter from '../routes/health.js';
 import authRouter from '../modules/auth/routes/auth.routes.js';
+<<<<<<< HEAD
 import profileRouter from '../modules/profile/routes/profile.routes.js';
 import companyRouter from '../modules/company/routes/company.routes.js';
 import resumeRouter from '../modules/resume/routes/resume.routes.js';
 import mediaRouter from '../modules/media/routes/media.routes.js';
+=======
+>>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
 
 /**
  * Express application factory.
@@ -32,10 +35,13 @@ export function createApp(): Application {
   // ── API Routes ───────────────────────────────────────────────────────────
   app.use('/api/health', healthRouter);
   app.use('/api/v1/auth', authRouter);
+<<<<<<< HEAD
   app.use('/api/v1/profile', profileRouter);
   app.use('/api/v1/company', companyRouter);
   app.use('/api/v1/resume', resumeRouter);
   app.use('/api/v1/media', mediaRouter);
+=======
+>>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
 
   // ── 404 → must come after all routes ────────────────────────────────────
   app.use(notFoundHandler);

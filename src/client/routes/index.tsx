@@ -5,7 +5,10 @@ import { MinimalLayout } from '../layouts/MinimalLayout';
 import { ErrorLayout } from '../layouts/ErrorLayout';
 import { AppSpinner } from '../components/feedback/AppSpinner';
 import { PublicOnlyRoute } from '../components/routes/PublicOnlyRoute';
+<<<<<<< HEAD
 import { ProtectedRoute } from '../components/routes/ProtectedRoute';
+=======
+>>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
 import { useAuthStore } from '../features/auth/store/useAuthStore';
 import { authApi } from '../features/auth/services/authApi';
 
@@ -18,12 +21,15 @@ const AboutPage = lazy(() => import('../pages/AboutPage').then((m) => ({ default
 const ContactPage = lazy(() => import('../pages/ContactPage').then((m) => ({ default: m.ContactPage })));
 const CareerResourcesPage = lazy(() => import('../pages/CareerResourcesPage').then((m) => ({ default: m.CareerResourcesPage })));
 
+<<<<<<< HEAD
 // Lazy loaded profile & company pages
 const PublicCandidateProfilePage = lazy(() => import('../pages/PublicCandidateProfilePage').then((m) => ({ default: m.PublicCandidateProfilePage })));
 const PublicCompanyProfilePage = lazy(() => import('../pages/PublicCompanyProfilePage').then((m) => ({ default: m.PublicCompanyProfilePage })));
 const CandidateDashboardPage = lazy(() => import('../pages/CandidateDashboardPage').then((m) => ({ default: m.CandidateDashboardPage })));
 const EmployerCompanyDashboardPage = lazy(() => import('../pages/EmployerCompanyDashboardPage').then((m) => ({ default: m.EmployerCompanyDashboardPage })));
 
+=======
+>>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
 // Lazy loaded auth pages
 const LoginPage = lazy(() => import('../features/auth/pages/LoginPage').then((m) => ({ default: m.LoginPage })));
 const RegisterJobSeekerPage = lazy(() => import('../features/auth/pages/RegisterJobSeekerPage').then((m) => ({ default: m.RegisterJobSeekerPage })));
@@ -45,6 +51,10 @@ export function AppRoutes() {
     authApi
       .getCurrentUser()
       .then((user) => {
+<<<<<<< HEAD
+=======
+        // User is authenticated via cookie
+>>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
         useAuthStore.getState().updateUser(user);
       })
       .catch(() => {
@@ -77,6 +87,18 @@ export function AppRoutes() {
           <Route path="/career-resources" element={<CareerResourcesPage />} />
           <Route path="/profile/:username" element={<PublicCandidateProfilePage />} />
           <Route path="/company/:id" element={<PublicCompanyProfilePage />} />
+        </Route>
+
+        {/* Guest Only Auth Pages */}
+        <Route element={<PublicOnlyRoute />}>
+          <Route element={<MinimalLayout />}>
+            <Route path="/auth/login" element={<LoginPage />} />
+            <Route path="/auth/register/job-seeker" element={<RegisterJobSeekerPage />} />
+            <Route path="/auth/register/employer" element={<RegisterEmployerPage />} />
+            <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+          </Route>
         </Route>
 
         {/* Guest Only Auth Pages */}

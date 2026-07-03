@@ -64,6 +64,7 @@ export function Header() {
     setAnchorEl(null);
   };
 
+<<<<<<< HEAD
   const handleNavigateToProfile = () => {
     handleCloseMenu();
     if (user?.role === 'EMPLOYER' || user?.role === 'ADMIN') {
@@ -79,6 +80,8 @@ export function Header() {
     navigate('/profile/me');
   };
 
+=======
+>>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
   const handleLogout = async () => {
     handleCloseMenu();
     try {
@@ -172,13 +175,21 @@ export function Header() {
                       {user.email}
                     </Typography>
                   </Box>
+<<<<<<< HEAD
                   <MenuItem onClick={handleNavigateToProfile} sx={{ py: 1.5 }}>
+=======
+                  <MenuItem onClick={handleCloseMenu}>
+>>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
                     <ListItemIcon>
                       <AccountCircleIcon fontSize="small" />
                     </ListItemIcon>
                     My Profile
                   </MenuItem>
+<<<<<<< HEAD
                   <MenuItem onClick={handleNavigateToSessions} sx={{ py: 1.5 }}>
+=======
+                  <MenuItem onClick={handleCloseMenu}>
+>>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
                     <ListItemIcon>
                       <SecurityIcon fontSize="small" />
                     </ListItemIcon>
