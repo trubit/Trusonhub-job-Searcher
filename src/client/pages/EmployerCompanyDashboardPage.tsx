@@ -55,13 +55,31 @@ const AVAILABLE_BENEFITS = [
   'Gym Membership',
 ];
 
+interface UserAccountData {
+  id?: string;
+  firstName: string;
+  lastName: string;
+  username?: string;
+  email: string;
+  phoneNumber?: string;
+  avatarUrl?: string;
+  role?: string;
+}
+
+interface EmployerProfileDetails {
+  position?: string;
+  department?: string;
+  businessEmail?: string;
+  phone?: string;
+}
+
 // ─── EMPLOYER PROFILE DIALOG ────────────────────────────────────────────────
 function EmployerProfileDialog({
   open, profile, user, onClose, onSaved
 }: {
   open: boolean;
-  profile: Record<string, string> | null;
-  user: Record<string, string> | null;
+  profile: EmployerProfileDetails | null;
+  user: UserAccountData | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -339,8 +357,8 @@ function BenefitsDialog({
 // ─── MAIN PORTAL PAGE ────────────────────────────────────────────────────────
 export function EmployerCompanyDashboardPage() {
   const [companies, setCompanies] = useState<CompanyData[]>([]);
-  const [employerProfile, setEmployerProfile] = useState<Record<string, unknown> | null>(null);
-  const [userAccount, setUserAccount] = useState<Record<string, unknown> | null>(null);
+  const [employerProfile, setEmployerProfile] = useState<EmployerProfileDetails | null>(null);
+  const [userAccount, setUserAccount] = useState<UserAccountData | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
@@ -373,8 +391,8 @@ export function EmployerCompanyDashboardPage() {
   const fetchProfileAndCompanies = async () => {
     try {
       const p = await profileApi.getMyProfile();
-      setEmployerProfile(p.profile);
-      setUserAccount(p.user);
+      setEmployerProfile(p.profile as never);
+      setUserAccount(p.user as never);
 
       const data = await companyApi.getMyCompanies();
       setCompanies(data || []);

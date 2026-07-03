@@ -13,7 +13,6 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
-  Chip,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -64,7 +63,6 @@ export function Header() {
     setAnchorEl(null);
   };
 
-<<<<<<< HEAD
   const handleNavigateToProfile = () => {
     handleCloseMenu();
     if (user?.role === 'EMPLOYER' || user?.role === 'ADMIN') {
@@ -76,12 +74,9 @@ export function Header() {
 
   const handleNavigateToSessions = () => {
     handleCloseMenu();
-    // Active sessions - navigate to profile page for now
     navigate('/profile/me');
   };
 
-=======
->>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
   const handleLogout = async () => {
     handleCloseMenu();
     try {
@@ -97,41 +92,30 @@ export function Header() {
   return (
     <AppBar
       position="sticky"
+      color="default"
+      elevation={isScrolled ? 2 : 0}
       sx={{
-        top: 0,
-        zIndex: 1100,
-        transition: 'all 0.3s ease',
-        boxShadow: isScrolled ? (isDark ? '0 4px 20px rgba(0,0,0,0.5)' : '0 4px 20px rgba(0,0,0,0.06)') : 'none',
+        bgcolor: isScrolled ? 'background.paper' : 'transparent',
+        borderBottom: '1px solid',
+        borderColor: isScrolled ? 'divider' : 'transparent',
+        transition: 'all 0.2s ease-in-out',
+        backdropFilter: 'blur(8px)',
       }}
     >
-      <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3 } }}>
+      <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ height: 72, justifyContent: 'space-between' }}>
           {/* Logo */}
-          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <Box
-                sx={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: '10px',
-                  bgcolor: 'primary.main',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#fff',
-                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
-                }}
-              >
-                <WorkIcon sx={{ fontSize: 20 }} />
-              </Box>
-              <Typography variant="h6" fontWeight={800} letterSpacing="-0.02em">
-                TrusonHub
-              </Typography>
-            </Stack>
-          </Link>
+          <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none', color: 'text.primary' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: '10px', bgcolor: 'primary.main', color: '#fff' }}>
+              <WorkIcon fontSize="medium" />
+            </Box>
+            <Typography variant="h6" fontWeight={800} sx={{ letterSpacing: '-0.5px' }}>
+              Truson<span style={{ color: '#1976d2' }}>Hub</span>
+            </Typography>
+          </Box>
 
           {/* Desktop Navigation Links */}
-          <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center' }}>
+          <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' } }}>
             {NAV_ITEMS.map((item) => (
               <NavLink key={item.path} to={item.path}>
                 {item.label}
@@ -139,22 +123,17 @@ export function Header() {
             ))}
           </Stack>
 
-          {/* Desktop Actions */}
-          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <IconButton onClick={toggleTheme} aria-label="Toggle Theme" size="small" sx={{ p: 1 }}>
-              {isDark ? <LightModeIcon sx={{ fontSize: 20 }} /> : <DarkModeIcon sx={{ fontSize: 20 }} />}
+          {/* Right Action Controls */}
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            {/* Theme Toggle */}
+            <IconButton onClick={toggleTheme} color="inherit" aria-label="Toggle Theme Mode">
+              {isDark ? <LightModeIcon fontSize="medium" /> : <DarkModeIcon fontSize="medium" />}
             </IconButton>
 
             {isAuthenticated && user ? (
               <>
-                <Chip
-                  label={user.role.replace('_', ' ')}
-                  size="small"
-                  color={user.role === 'EMPLOYER' ? 'secondary' : 'primary'}
-                  sx={{ fontWeight: 700, fontSize: '0.7rem' }}
-                />
-                <IconButton onClick={handleOpenMenu} size="small" aria-label="User Account Menu">
-                  <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontWeight: 700, fontSize: '0.875rem' }}>
+                <IconButton onClick={handleOpenMenu} sx={{ p: 0.5 }} aria-label="User Account Menu">
+                  <Avatar src={user.avatarUrl} alt={user.firstName} sx={{ width: 40, height: 40, bgcolor: 'primary.main', fontWeight: 700 }}>
                     {user.firstName.charAt(0)}
                   </Avatar>
                 </IconButton>
@@ -175,27 +154,19 @@ export function Header() {
                       {user.email}
                     </Typography>
                   </Box>
-<<<<<<< HEAD
                   <MenuItem onClick={handleNavigateToProfile} sx={{ py: 1.5 }}>
-=======
-                  <MenuItem onClick={handleCloseMenu}>
->>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
                     <ListItemIcon>
                       <AccountCircleIcon fontSize="small" />
                     </ListItemIcon>
                     My Profile
                   </MenuItem>
-<<<<<<< HEAD
                   <MenuItem onClick={handleNavigateToSessions} sx={{ py: 1.5 }}>
-=======
-                  <MenuItem onClick={handleCloseMenu}>
->>>>>>> 63938e92090d67668577a9dc08e7b6a2ebf3a2bf
                     <ListItemIcon>
                       <SecurityIcon fontSize="small" />
                     </ListItemIcon>
                     Active Sessions
                   </MenuItem>
-                  <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                  <MenuItem onClick={handleLogout} sx={{ color: 'error.main', py: 1.5 }}>
                     <ListItemIcon>
                       <LogoutIcon fontSize="small" color="error" />
                     </ListItemIcon>
