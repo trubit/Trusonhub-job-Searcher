@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -9,14 +9,24 @@ import {
   Stack,
   Button,
   IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  Chip,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import WorkIcon from '@mui/icons-material/Work';
+import LogoutIcon from '@mui/icons-material/Logout';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import SecurityIcon from '@mui/icons-material/Security';
 import { NavLink } from './NavLink';
 import { MobileDrawer } from './MobileDrawer';
 import { useThemeStore } from '../../store/themeStore';
+import { useAuthStore } from '../../features/auth/store/useAuthStore';
+import { authApi } from '../../features/auth/services/authApi';
 
 const NAV_ITEMS = [
   { label: 'Home', path: '/' },
@@ -29,9 +39,13 @@ const NAV_ITEMS = [
 ];
 
 export function Header() {
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
   const { toggleTheme, getEffectiveMode } = useThemeStore();
+  const { user, isAuthenticated, clearAuth } = useAuthStore();
   const isDark = getEffectiveMode() === 'dark';
 
   useEffect(() => {
@@ -41,6 +55,41 @@ export function Header() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  const handleNavigateToProfile = () => {
+    handleCloseMenu();
+    if (user?.role === 'EMPLOYER' || user?.role === 'ADMIN') {
+      navigate('/company/dashboard');
+    } else {
+      navigate('/profile/me');
+    }
+  };
+
+  const handleNavigateToSessions = () => {
+    handleCloseMenu();
+    // Active sessions - navigate to profile page for now
+    navigate('/profile/me');
+  };
+
+  const handleLogout = async () => {
+    handleCloseMenu();
+    try {
+      await authApi.logout();
+    } catch {
+      // Ignore network errors on logout
+    } finally {
+      clearAuth();
+      navigate('/auth/login');
+    }
+  };
 
   return (
     <AppBar
@@ -92,12 +141,67 @@ export function Header() {
             <IconButton onClick={toggleTheme} aria-label="Toggle Theme" size="small" sx={{ p: 1 }}>
               {isDark ? <LightModeIcon sx={{ fontSize: 20 }} /> : <DarkModeIcon sx={{ fontSize: 20 }} />}
             </IconButton>
-            <Button variant="text" size="medium">
-              Login
-            </Button>
-            <Button variant="contained" color="primary" size="medium">
-              Register
-            </Button>
+
+            {isAuthenticated && user ? (
+              <>
+                <Chip
+                  label={user.role.replace('_', ' ')}
+                  size="small"
+                  color={user.role === 'EMPLOYER' ? 'secondary' : 'primary'}
+                  sx={{ fontWeight: 700, fontSize: '0.7rem' }}
+                />
+                <IconButton onClick={handleOpenMenu} size="small" aria-label="User Account Menu">
+                  <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontWeight: 700, fontSize: '0.875rem' }}>
+                    {user.firstName.charAt(0)}
+                  </Avatar>
+                </IconButton>
+
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleCloseMenu}
+                  PaperProps={{
+                    sx: { minWidth: 200, borderRadius: '12px', mt: 1, boxShadow: '0 8px 32px rgba(0,0,0,0.15)' },
+                  }}
+                >
+                  <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                    <Typography variant="subtitle2" fontWeight={700}>
+                      {user.firstName} {user.lastName}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {user.email}
+                    </Typography>
+                  </Box>
+                  <MenuItem onClick={handleNavigateToProfile} sx={{ py: 1.5 }}>
+                    <ListItemIcon>
+                      <AccountCircleIcon fontSize="small" />
+                    </ListItemIcon>
+                    My Profile
+                  </MenuItem>
+                  <MenuItem onClick={handleNavigateToSessions} sx={{ py: 1.5 }}>
+                    <ListItemIcon>
+                      <SecurityIcon fontSize="small" />
+                    </ListItemIcon>
+                    Active Sessions
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                    <ListItemIcon>
+                      <LogoutIcon fontSize="small" color="error" />
+                    </ListItemIcon>
+                    Sign Out
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <>
+                <Button component={Link} to="/auth/login" variant="text" size="medium">
+                  Login
+                </Button>
+                <Button component={Link} to="/auth/register/job-seeker" variant="contained" color="primary" size="medium">
+                  Register
+                </Button>
+              </>
+            )}
           </Stack>
 
           {/* Mobile Menu Button */}

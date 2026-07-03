@@ -11,14 +11,18 @@ import { logger } from '../utils/logger.js';
  */
 export const helmetMiddleware = helmet({
   crossOriginEmbedderPolicy: false, // Required for some CDN assets in dev
+  crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow cross-origin resource downloads
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'],
-      connectSrc: ["'self'", env.CLIENT_URL],
+      imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com', 'https://images.unsplash.com', 'https:'],
+      mediaSrc: ["'self'", 'https://res.cloudinary.com', 'blob:'],
+      frameSrc: ["'self'", 'https://res.cloudinary.com', 'https://www.w3.org'],
+      objectSrc: ["'self'", 'https://res.cloudinary.com', 'https://www.w3.org'],
+      connectSrc: ["'self'", env.CLIENT_URL, 'https://res.cloudinary.com', 'https://api.cloudinary.com', 'blob:'],
     },
   },
 });
