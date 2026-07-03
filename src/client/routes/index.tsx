@@ -1,10 +1,14 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { PublicLayout } from '../layouts/PublicLayout';
+import { MinimalLayout } from '../layouts/MinimalLayout';
 import { ErrorLayout } from '../layouts/ErrorLayout';
 import { AppSpinner } from '../components/feedback/AppSpinner';
+import { PublicOnlyRoute } from '../components/routes/PublicOnlyRoute';
+import { useAuthStore } from '../features/auth/store/useAuthStore';
+import { authApi } from '../features/auth/services/authApi';
 
-// Lazy loaded pages for optimal bundle splitting
+// Lazy loaded public pages
 const LandingPage = lazy(() => import('../pages/LandingPage').then((m) => ({ default: m.LandingPage })));
 const JobsPage = lazy(() => import('../pages/JobsPage').then((m) => ({ default: m.JobsPage })));
 const CompaniesPage = lazy(() => import('../pages/CompaniesPage').then((m) => ({ default: m.CompaniesPage })));
@@ -12,11 +16,39 @@ const PricingPage = lazy(() => import('../pages/PricingPage').then((m) => ({ def
 const AboutPage = lazy(() => import('../pages/AboutPage').then((m) => ({ default: m.AboutPage })));
 const ContactPage = lazy(() => import('../pages/ContactPage').then((m) => ({ default: m.ContactPage })));
 const CareerResourcesPage = lazy(() => import('../pages/CareerResourcesPage').then((m) => ({ default: m.CareerResourcesPage })));
+
+// Lazy loaded auth pages
+const LoginPage = lazy(() => import('../features/auth/pages/LoginPage').then((m) => ({ default: m.LoginPage })));
+const RegisterJobSeekerPage = lazy(() => import('../features/auth/pages/RegisterJobSeekerPage').then((m) => ({ default: m.RegisterJobSeekerPage })));
+const RegisterEmployerPage = lazy(() => import('../features/auth/pages/RegisterEmployerPage').then((m) => ({ default: m.RegisterEmployerPage })));
+const ForgotPasswordPage = lazy(() => import('../features/auth/pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import('../features/auth/pages/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })));
+const VerifyEmailPage = lazy(() => import('../features/auth/pages/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage })));
+
+// Lazy loaded error pages
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 const ServerErrorPage = lazy(() => import('../pages/ServerErrorPage').then((m) => ({ default: m.ServerErrorPage })));
 const MaintenancePage = lazy(() => import('../pages/MaintenancePage').then((m) => ({ default: m.MaintenancePage })));
 
 export function AppRoutes() {
+  const { setInitializing } = useAuthStore();
+
+  useEffect(() => {
+    // Attempt silent token refresh on application load
+    authApi
+      .getCurrentUser()
+      .then((user) => {
+        // User is authenticated via cookie
+        useAuthStore.getState().updateUser(user);
+      })
+      .catch(() => {
+        // Unauthenticated or no active cookie
+      })
+      .finally(() => {
+        setInitializing(false);
+      });
+  }, [setInitializing]);
+
   return (
     <Suspense fallback={<AppSpinner fullPage label="Loading Page..." />}>
       <Routes>
@@ -29,6 +61,18 @@ export function AppRoutes() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/career-resources" element={<CareerResourcesPage />} />
+        </Route>
+
+        {/* Guest Only Auth Pages */}
+        <Route element={<PublicOnlyRoute />}>
+          <Route element={<MinimalLayout />}>
+            <Route path="/auth/login" element={<LoginPage />} />
+            <Route path="/auth/register/job-seeker" element={<RegisterJobSeekerPage />} />
+            <Route path="/auth/register/employer" element={<RegisterEmployerPage />} />
+            <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/auth/verify-email" element={<VerifyEmailPage />} />
+          </Route>
         </Route>
 
         {/* Error Pages Layout Routes */}

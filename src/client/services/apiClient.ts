@@ -1,53 +1,98 @@
-import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '../features/auth/store/useAuthStore';
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
-/**
- * Axios instance pre-configured for the TrusonHub API.
- * - Base URL from environment variable
- * - 10s timeout
- * - JSON content-type
- * - Auth header injection via request interceptor
- * - Automatic token refresh stub (Phase 2)
- */
 export const apiClient = axios.create({
-  baseURL: `${BASE_URL}/api`,
-  timeout: 10_000,
+  baseURL: `${API_URL}/api/v1`,
+  withCredentials: true, // Send/receive HttpOnly cookies
   headers: {
     'Content-Type': 'application/json',
-    Accept: 'application/json',
   },
-  withCredentials: true,
 });
 
-// ── Request interceptor — inject access token ─────────────────────────────
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else if (token) {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Request Interceptor: Attach Access Token from memory store
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem('access_token');
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const accessToken = useAuthStore.getState().accessToken;
+    if (accessToken && config.headers) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
-  (error: AxiosError) => Promise.reject(error),
+  (error) => Promise.reject(error)
 );
 
-// ── Response interceptor — handle 401 / token refresh ────────────────────
+// Response Interceptor: Silent Token Refresh on 401
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Skip refresh logic for auth endpoints themselves to avoid infinite loops
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/login') &&
+      !originalRequest.url?.includes('/auth/register') &&
+      !originalRequest.url?.includes('/auth/refresh')
+    ) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            return apiClient(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
-      // Phase 2: implement token refresh here
-      // const newToken = await refreshAccessToken();
-      // originalRequest.headers.Authorization = `Bearer ${newToken}`;
-      // return apiClient(originalRequest);
+      isRefreshing = true;
+
+      try {
+        const response = await axios.post(
+          `${API_URL}/api/v1/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
+
+        const { accessToken, user } = response.data.data;
+        useAuthStore.getState().setAuth(user, accessToken);
+
+        processQueue(null, accessToken);
+
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        useAuthStore.getState().clearAuth();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
 
     return Promise.reject(error);
-  },
+  }
 );
-
-export default apiClient;
