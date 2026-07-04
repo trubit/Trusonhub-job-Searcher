@@ -29,7 +29,7 @@ router.get('/public', async (_req: Request, res: Response) => {
         totalApplications,
       },
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false, message: 'Failed to load stats' });
   }
 });

@@ -1,5 +1,4 @@
 import { apiClient } from '../../../services/apiClient';
-import { User } from '../../auth/types/auth.types';
 
 export interface ResumeInfo {
   _id: string;

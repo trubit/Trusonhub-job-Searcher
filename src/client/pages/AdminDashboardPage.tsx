@@ -42,7 +42,7 @@ import ShieldIcon from '@mui/icons-material/Shield';
 import { SEO } from '../components/seo/SEO';
 import { adminApi, AdminStats, AuditLogItem } from '../features/admin/services/adminApi';
 import { jobApi, JobData, JobCategoryData } from '../features/jobs/services/jobApi';
-import { User } from '../features/auth/types/auth.types';
+import { User, UserStatus, UserRole } from '../features/auth/types/auth.types';
 import { AppAlert } from '../components/feedback/AppAlert';
 import { apiClient } from '../services/apiClient';
 
@@ -101,8 +101,9 @@ export function AdminDashboardPage() {
       setJobs(jobsList);
       setCategories(categoriesList);
       setAuditLogs(logsList);
-    } catch (err: any) {
-      setErrorMessage(err.response?.data?.message || 'Failed to load administrative dashboard data.');
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { message?: string } } };
+      setErrorMessage(ax.response?.data?.message || 'Failed to load administrative dashboard data.');
     } finally {
       setLoading(false);
     }
@@ -141,8 +142,9 @@ export function AdminDashboardPage() {
       showMsg('User updated successfully.');
       setUserDialogOpen(false);
       loadAllData();
-    } catch (err: any) {
-      showMsg(err.response?.data?.message || 'Failed to update user parameters.', 'error');
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { message?: string } } };
+      showMsg(ax.response?.data?.message || 'Failed to update user parameters.', 'error');
     } finally {
       setSavingUser(false);
     }
@@ -227,7 +229,7 @@ export function AdminDashboardPage() {
               </Typography>
               <FormControl fullWidth>
                 <InputLabel>Account Status</InputLabel>
-                <Select value={editStatus} label="Account Status" onChange={(e) => setEditStatus(e.target.value as any)}>
+                <Select value={editStatus} label="Account Status" onChange={(e) => setEditStatus(e.target.value as UserStatus)}>
                   <MenuItem value="ACTIVE">ACTIVE</MenuItem>
                   <MenuItem value="INACTIVE">INACTIVE</MenuItem>
                   <MenuItem value="SUSPENDED">SUSPENDED</MenuItem>
@@ -236,7 +238,7 @@ export function AdminDashboardPage() {
               </FormControl>
               <FormControl fullWidth>
                 <InputLabel>System Role</InputLabel>
-                <Select value={editRole} label="System Role" onChange={(e) => setEditRole(e.target.value as any)}>
+                <Select value={editRole} label="System Role" onChange={(e) => setEditRole(e.target.value as UserRole)}>
                   <MenuItem value="JOB_SEEKER">JOB_SEEKER</MenuItem>
                   <MenuItem value="EMPLOYER">EMPLOYER</MenuItem>
                   <MenuItem value="ADMIN">ADMIN</MenuItem>

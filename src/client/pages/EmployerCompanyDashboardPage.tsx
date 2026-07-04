@@ -392,7 +392,7 @@ function ApplicantsTab({ jobs, selectedCompanyId }: { jobs: JobData[]; selectedC
     if (companyJobs.length > 0 && !selectedJobId) {
       setSelectedJobId(companyJobs[0]._id);
     }
-  }, [companyJobs]);
+  }, [companyJobs, selectedJobId]);
 
   useEffect(() => {
     if (!selectedJobId) return;

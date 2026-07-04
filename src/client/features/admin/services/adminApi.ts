@@ -26,7 +26,7 @@ export interface AuditLogItem {
   resource: string;
   ipAddress: string;
   userAgent: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   createdAt: string;
 }
 

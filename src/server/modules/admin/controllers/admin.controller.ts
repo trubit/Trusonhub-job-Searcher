@@ -38,7 +38,7 @@ export class AdminController {
   getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const search = req.query.search as string;
-      const query: Record<string, any> = { isDeleted: false };
+      const query: Record<string, unknown> = { isDeleted: false };
 
       if (search) {
         const regex = new RegExp(search, 'i');

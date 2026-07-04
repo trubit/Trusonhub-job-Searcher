@@ -77,7 +77,7 @@ export class ApplicationController {
             html,
           });
         }
-      } catch (_emailErr) {
+      } catch {
         // Email failure is non-critical — do not block the response
       }
 
@@ -151,7 +151,7 @@ export class ApplicationController {
         throw new AppError('Job application not found', 404);
       }
 
-      const job = application.job as any;
+      const job = application.job as unknown as { employer: { toString(): string }; title: string };
       if (job.employer.toString() !== employerId && userRole !== 'ADMIN') {
         throw new AppError('Unauthorized to update this application status', 403);
       }
@@ -205,7 +205,7 @@ export class ApplicationController {
             html,
           });
         }
-      } catch (_emailErr) {
+      } catch {
         // Email failure is non-critical
       }
 

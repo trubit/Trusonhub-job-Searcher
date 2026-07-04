@@ -592,6 +592,23 @@ async function downloadResume(fileUrl: string, fileName: string) {
 }
 
 // ─── MAIN PAGE ───────────────────────────────────────────────────────────────
+interface SavedJobItem {
+  _id: string;
+  job: {
+    _id: string;
+    title?: string;
+    slug?: string;
+    city?: string;
+    country?: string;
+    employmentType?: string;
+    company?: {
+      name?: string;
+      logoUrl?: string;
+    };
+  };
+  createdAt: string;
+}
+
 export function CandidateDashboardPage() {
   const navigate = useNavigate();
   const [tabIndex, setTabIndex] = useState(0);
@@ -602,7 +619,7 @@ export function CandidateDashboardPage() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [message, setMessage] = useState<{ text: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
-  const [savedJobs, setSavedJobs] = useState<Array<{ _id: string; job: any; createdAt: string }>>([]);
+  const [savedJobs, setSavedJobs] = useState<SavedJobItem[]>([]);
   const [loadingSavedJobs, setLoadingSavedJobs] = useState(false);
 
   const [applications, setApplications] = useState<JobApplicationData[]>([]);
@@ -612,7 +629,7 @@ export function CandidateDashboardPage() {
     try {
       setLoadingSavedJobs(true);
       const res = await apiClient.get('/bookmarks');
-      setSavedJobs(res.data.data?.filter((b: any) => b.job) || []);
+      setSavedJobs(res.data.data?.filter((b: SavedJobItem) => b.job) || []);
     } catch (err) {
       console.error('Failed to fetch saved jobs:', err);
     } finally {
@@ -671,6 +688,7 @@ export function CandidateDashboardPage() {
     } finally { setLoading(false); }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchProfile(); }, []);
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -105,6 +105,7 @@ export function JobDetailsPage() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, isAuthenticated, user]);
 
   const toggleBookmark = async () => {
@@ -143,8 +144,9 @@ export function JobDetailsPage() {
       setMyApplication(app);
       setApplyDialogOpen(false);
       alert('Your job application has been submitted successfully!');
-    } catch (err: any) {
-      setApplicationError(err.response?.data?.message || 'Failed to submit application.');
+    } catch (err: unknown) {
+      const ax = err as { response?: { data?: { message?: string } } };
+      setApplicationError(ax.response?.data?.message || 'Failed to submit application.');
     } finally {
       setSubmitting(false);
     }

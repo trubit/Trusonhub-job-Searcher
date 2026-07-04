@@ -69,15 +69,6 @@ export function Header() {
     setAnchorEl(null);
   };
 
-  const handleNavigateToProfile = () => {
-    handleCloseMenu();
-    if (user?.role === 'EMPLOYER' || user?.role === 'ADMIN') {
-      navigate('/company/dashboard');
-    } else {
-      navigate('/profile/me');
-    }
-  };
-
   const handleNavigateToSessions = () => {
     handleCloseMenu();
     navigate('/auth/sessions');
