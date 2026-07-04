@@ -86,21 +86,21 @@ export function ContactPage() {
               </Stack>
             </Stack>
 
-            {/* Map Placeholder */}
+            {/* Location Visual Box */}
             <Paper
               sx={{
-                height: 200,
+                p: 3,
                 borderRadius: '16px',
-                bgcolor: 'action.hover',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px dashed',
+                bgcolor: 'background.paper',
+                border: '1px solid',
                 borderColor: 'divider',
               }}
             >
-              <Typography variant="body2" color="text.secondary" fontWeight={600}>
-                [ Interactive Map Location Placeholder ]
+              <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
+                Global Operations
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Our team operates globally with hubs in San Francisco, New York, London, and Singapore.
               </Typography>
             </Paper>
           </Grid>

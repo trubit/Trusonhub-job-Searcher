@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -44,6 +45,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import TranslateIcon from '@mui/icons-material/Translate';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { profileApi } from '../features/profile/services/profileApi';
 import { resumeApi, ResumeItem } from '../features/resume/services/resumeApi';
 import { JobSeekerProfileData, Education, Experience, Certification, Language, Portfolio as PortfolioType } from '../features/profile/types/profile.types';
@@ -51,6 +53,7 @@ import { AppSpinner } from '../components/feedback/AppSpinner';
 import { AppAlert } from '../components/feedback/AppAlert';
 import { SEO } from '../components/seo/SEO';
 import { apiClient } from '../services/apiClient';
+import { applicationApi, JobApplicationData } from '../features/applications/services/applicationApi';
 
 // ─── BIO EDIT DIALOG ─────────────────────────────────────────────────────────
 function BioEditDialog({
@@ -590,6 +593,7 @@ async function downloadResume(fileUrl: string, fileName: string) {
 
 // ─── MAIN PAGE ───────────────────────────────────────────────────────────────
 export function CandidateDashboardPage() {
+  const navigate = useNavigate();
   const [tabIndex, setTabIndex] = useState(0);
   const [data, setData] = useState<JobSeekerProfileData | null>(null);
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
@@ -597,6 +601,36 @@ export function CandidateDashboardPage() {
   const [uploadingResume, setUploadingResume] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [message, setMessage] = useState<{ text: string; severity: 'success' | 'error' | 'info' } | null>(null);
+
+  const [savedJobs, setSavedJobs] = useState<Array<{ _id: string; job: any; createdAt: string }>>([]);
+  const [loadingSavedJobs, setLoadingSavedJobs] = useState(false);
+
+  const [applications, setApplications] = useState<JobApplicationData[]>([]);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+
+  const fetchSavedJobs = async () => {
+    try {
+      setLoadingSavedJobs(true);
+      const res = await apiClient.get('/bookmarks');
+      setSavedJobs(res.data.data?.filter((b: any) => b.job) || []);
+    } catch (err) {
+      console.error('Failed to fetch saved jobs:', err);
+    } finally {
+      setLoadingSavedJobs(false);
+    }
+  };
+
+  const fetchApplications = async () => {
+    try {
+      setLoadingApplications(true);
+      const res = await applicationApi.getMyApplications();
+      setApplications(res || []);
+    } catch (err) {
+      console.error('Failed to fetch applications:', err);
+    } finally {
+      setLoadingApplications(false);
+    }
+  };
 
   // Modal open states
   const [bioDialogOpen, setBioDialogOpen] = useState(false);
@@ -624,6 +658,8 @@ export function CandidateDashboardPage() {
 
   const fetchProfile = async () => {
     try {
+      fetchSavedJobs();
+      fetchApplications();
       const p = await profileApi.getMyProfile();
       setData(p);
       try {
@@ -897,6 +933,8 @@ export function CandidateDashboardPage() {
                 <Tab icon={<TranslateIcon />} iconPosition="start" label={`Languages (${languages?.length || 0})`} />
                 <Tab icon={<CodeIcon />} iconPosition="start" label={`Portfolio (${portfolio.length})`} />
                 <Tab icon={<DescriptionIcon />} iconPosition="start" label={`Resumes (${resumes.length})`} />
+                <Tab icon={<BookmarkIcon />} iconPosition="start" label={`Saved Jobs (${savedJobs.length})`} />
+                <Tab icon={<WorkIcon />} iconPosition="start" label={`Applications (${applications.length})`} />
               </Tabs>
 
               <Box sx={{ p: 4 }}>
@@ -1280,6 +1318,164 @@ export function CandidateDashboardPage() {
                       </Stack>
                     )}
                   </Stack>
+                )}
+
+                {/* ── TAB 8: SAVED JOBS ── */}
+                {tabIndex === 8 && (
+                  <Stack spacing={3}>
+                    <Typography variant="h6" fontWeight={700}>Saved Openings</Typography>
+                    {loadingSavedJobs ? (
+                      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress /></Box>
+                    ) : savedJobs.length === 0 ? (
+                      <Paper sx={{ p: 4, textAlign: 'center', bgcolor: 'action.hover', borderRadius: '12px' }}>
+                        <BookmarkIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+                        <Typography variant="body2" color="text.secondary">No bookmarked jobs found.</Typography>
+                      </Paper>
+                    ) : (
+                      <Stack spacing={2}>
+                        {savedJobs.map((item) => {
+                          const job = item.job;
+                          return (
+                            <Paper
+                              key={item._id}
+                              sx={{
+                                p: 3,
+                                borderRadius: '12px',
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                transition: 'all 0.2s',
+                                '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.06)' },
+                              }}
+                            >
+                              <Grid container spacing={2} alignItems="center">
+                                <Grid size={{ xs: 12, sm: 8 }}>
+                                  <Stack direction="row" spacing={2} alignItems="center">
+                                    <Avatar src={job.company?.logoUrl} variant="rounded">
+                                      {job.company?.name?.charAt(0)}
+                                    </Avatar>
+                                    <Box>
+                                      <Typography variant="subtitle1" fontWeight={800}>{job.title}</Typography>
+                                      <Typography variant="body2" color="primary.main" fontWeight={700}>
+                                        {job.company?.name}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary" display="block">
+                                        {job.city}, {job.country} • {job.employmentType}
+                                      </Typography>
+                                    </Box>
+                                  </Stack>
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 4 }}>
+                                  <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                    <Button
+                                      size="small"
+                                      color="error"
+                                      onClick={async () => {
+                                        try {
+                                          await apiClient.delete(`/jobs/${job._id}/bookmark`);
+                                          showMsg('Bookmark removed.');
+                                          fetchSavedJobs();
+                                        } catch {
+                                          showMsg('Failed to remove bookmark.', 'error');
+                                        }
+                                      }}
+                                    >
+                                      Remove
+                                    </Button>
+                                    <Button
+                                      size="small"
+                                      variant="outlined"
+                                      onClick={() => navigate(`/jobs/${job.slug}`)}
+                                    >
+                                      View
+                                    </Button>
+                                  </Stack>
+                                </Grid>
+                              </Grid>
+                            </Paper>
+                          );
+                        })}
+                      </Stack>
+                    )}
+                  </Stack>
+                )}
+
+                {/* ── TAB 9: APPLICATIONS ── */}
+                {tabIndex === 9 && (
+                   <Stack spacing={3}>
+                     <Typography variant="h6" fontWeight={700}>My Submitted Applications</Typography>
+                     {loadingApplications ? (
+                       <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress /></Box>
+                     ) : applications.length === 0 ? (
+                       <Paper sx={{ p: 4, textAlign: 'center', bgcolor: 'action.hover', borderRadius: '12px' }}>
+                         <WorkIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+                         <Typography variant="body2" color="text.secondary">You haven't applied to any jobs yet.</Typography>
+                         <Button variant="outlined" size="small" onClick={() => navigate('/jobs')} sx={{ mt: 2 }}>
+                           Browse Jobs
+                         </Button>
+                       </Paper>
+                     ) : (
+                       <Stack spacing={2}>
+                         {applications.map((app) => {
+                           const job = app.job;
+                           if (!job) return null;
+                           return (
+                             <Paper
+                               key={app._id}
+                               sx={{
+                                 p: 3,
+                                 borderRadius: '12px',
+                                 border: '1px solid',
+                                 borderColor: 'divider',
+                                 transition: 'all 0.2s',
+                                 '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.06)' },
+                               }}
+                             >
+                               <Grid container spacing={2} alignItems="center">
+                                 <Grid size={{ xs: 12, sm: 8 }}>
+                                   <Stack direction="row" spacing={2} alignItems="center">
+                                     <Avatar src={job.company?.logoUrl} variant="rounded">
+                                       {job.company?.name ? job.company.name.charAt(0) : 'J'}
+                                     </Avatar>
+                                     <Box>
+                                       <Typography variant="subtitle1" fontWeight={800}>{job.title}</Typography>
+                                       <Typography variant="body2" color="primary.main" fontWeight={700}>
+                                         {job.company?.name || 'Vetted Employer'}
+                                       </Typography>
+                                       <Typography variant="caption" color="text.secondary" display="block">
+                                         Applied on {new Date(app.createdAt).toLocaleDateString()} • Resume: {app.resume?.fileName || 'Attached Resume'}
+                                       </Typography>
+                                     </Box>
+                                   </Stack>
+                                 </Grid>
+                                 <Grid size={{ xs: 12, sm: 4 }}>
+                                   <Stack direction="row" spacing={2} alignItems="center" justifyContent="flex-end">
+                                     <Chip
+                                       label={app.status}
+                                       color={
+                                         app.status === 'ACCEPTED' || app.status === 'SHORTLISTED'
+                                           ? 'success'
+                                           : app.status === 'REJECTED'
+                                           ? 'error'
+                                           : 'primary'
+                                       }
+                                       sx={{ fontWeight: 700 }}
+                                     />
+                                     <Button
+                                       size="small"
+                                       variant="outlined"
+                                       onClick={() => navigate(`/jobs/${job.slug}`)}
+                                     >
+                                       View Details
+                                     </Button>
+                                   </Stack>
+                                 </Grid>
+                               </Grid>
+                             </Paper>
+                           );
+                         })}
+                       </Stack>
+                     )}
+                   </Stack>
                 )}
               </Box>
             </Paper>

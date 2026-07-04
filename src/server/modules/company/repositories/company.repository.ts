@@ -29,4 +29,8 @@ export class CompanyRepository {
     const res = await Company.updateOne({ _id: id, owner: ownerId }, { isDeleted: true, deletedAt: new Date() });
     return res.modifiedCount > 0;
   }
+
+  async findAll(): Promise<ICompany[]> {
+    return Company.find({ isDeleted: false }).sort({ createdAt: -1 });
+  }
 }

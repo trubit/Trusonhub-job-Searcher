@@ -55,4 +55,13 @@ export class CompanyController {
       next(error);
     }
   };
+
+  getAllCompanies = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const companies = await this.service.getAllCompanies();
+      res.status(200).json({ success: true, data: companies });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

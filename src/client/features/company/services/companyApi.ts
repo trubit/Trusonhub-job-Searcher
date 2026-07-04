@@ -43,6 +43,11 @@ export const companyApi = {
     return res.data.data;
   },
 
+  async getAllCompanies(): Promise<CompanyData[]> {
+    const res = await apiClient.get<{ success: boolean; data: CompanyData[] }>('/company');
+    return res.data.data;
+  },
+
   async getCompany(idOrSlug: string): Promise<CompanyData> {
     const res = await apiClient.get<{ success: boolean; data: CompanyData }>(`/company/${idOrSlug}`);
     return res.data.data;

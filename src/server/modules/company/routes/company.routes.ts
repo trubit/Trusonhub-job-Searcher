@@ -10,6 +10,7 @@ const controller = new CompanyController();
 
 // ── Authenticated Specific Routes (must precede dynamic /:id route) ─────────
 router.get('/my/all', authenticate, authorize('EMPLOYER', 'ADMIN'), controller.getMyCompanies);
+router.get('/', controller.getAllCompanies);
 
 // ── Public Company Profile Route ─────────────────────────────────────────────
 router.get('/:id', controller.getCompany);

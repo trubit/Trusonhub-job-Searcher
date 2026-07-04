@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Container, Typography, Stack, Grid, ToggleButtonGroup, ToggleButton, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { PricingCard } from '../components/cards/PricingCard';
@@ -52,6 +53,7 @@ const FAQS = [
 ];
 
 export function PricingPage() {
+  const navigate = useNavigate();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
 
   return (
@@ -87,7 +89,16 @@ export function PricingPage() {
         <Grid container spacing={3} alignItems="stretch" sx={{ mb: 10 }}>
           {PRICING_PLANS.map((plan, idx) => (
             <Grid key={idx} size={{ xs: 12, sm: 6, md: 3 }}>
-              <PricingCard {...plan} />
+              <PricingCard
+                {...plan}
+                onClick={() => {
+                  if (plan.title === 'Free') {
+                    navigate('/auth/register/job-seeker');
+                  } else {
+                    navigate('/auth/register/employer');
+                  }
+                }}
+              />
             </Grid>
           ))}
         </Grid>

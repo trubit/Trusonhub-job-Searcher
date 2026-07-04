@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { Box, Container, Typography, Stack, Grid, Paper, Avatar } from '@mui/material';
 import TargetIcon from '@mui/icons-material/TrackChanges';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { SEO } from '../components/seo/SEO';
+import { statsApi, PlatformStats } from '../features/stats/statsApi';
 
 const VALUES = [
   {
@@ -23,6 +25,20 @@ const VALUES = [
 ];
 
 export function AboutPage() {
+  const [stats, setStats] = useState<PlatformStats | null>(null);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const res = await statsApi.getPublicStats();
+        setStats(res);
+      } catch (err) {
+        console.error('Failed to load stats:', err);
+      }
+    }
+    loadStats();
+  }, []);
+
   return (
     <>
       <SEO title="About Us — TrusonHub Job Searcher" description="Learn about our mission, vision, values, and company story." />
@@ -39,15 +55,15 @@ export function AboutPage() {
         </Container>
       </Box>
 
-      {/* Stats Bar */}
+      {/* Live Stats Bar */}
       <Box sx={{ py: 6, bgcolor: 'primary.main', color: '#fff' }}>
         <Container maxWidth="xl">
           <Grid container spacing={4} textAlign="center">
             {[
-              { num: '50k+', label: 'Active Jobs' },
-              { num: '12k+', label: 'Verified Employers' },
-              { num: '2.5M+', label: 'Job Applications Sent' },
-              { num: '98%', label: 'Employer Satisfaction' },
+              { num: stats ? `${stats.totalJobs.toLocaleString()}+` : '100+', label: 'Active Jobs' },
+              { num: stats ? `${stats.totalCompanies.toLocaleString()}+` : '50+', label: 'Verified Employers' },
+              { num: stats ? `${stats.totalApplications.toLocaleString()}+` : '1000+', label: 'Job Applications Sent' },
+              { num: stats ? `${stats.totalCandidates.toLocaleString()}+` : '500+', label: 'Registered Candidates' },
             ].map((s, idx) => (
               <Grid key={idx} size={{ xs: 6, md: 3 }}>
                 <Typography variant="h3" fontWeight={800}>

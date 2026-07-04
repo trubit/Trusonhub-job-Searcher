@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -25,6 +26,9 @@ import {
   Divider,
   CircularProgress,
   Avatar,
+  Tooltip,
+  Badge,
+  Alert,
 } from '@mui/material';
 import BusinessIcon from '@mui/icons-material/Business';
 import AddIcon from '@mui/icons-material/Add';
@@ -37,12 +41,23 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import BrushIcon from '@mui/icons-material/Brush';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import StarIcon from '@mui/icons-material/Star';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { companyApi, CompanyData } from '../features/company/services/companyApi';
 import { profileApi } from '../features/profile/services/profileApi';
+import { jobApi, JobData } from '../features/jobs/services/jobApi';
 import { AppSpinner } from '../components/feedback/AppSpinner';
 import { AppAlert } from '../components/feedback/AppAlert';
 import { SEO } from '../components/seo/SEO';
 import { apiClient } from '../services/apiClient';
+import { applicationApi, JobApplicationData } from '../features/applications/services/applicationApi';
+import WorkIcon from '@mui/icons-material/Work';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 const AVAILABLE_BENEFITS = [
   'Health Insurance',
@@ -354,8 +369,259 @@ function BenefitsDialog({
   );
 }
 
+// ─── STATUS CONFIG HELPER ───────────────────────────────────────────────────
+const STATUS_CONFIG: Record<string, { color: 'default' | 'primary' | 'warning' | 'error' | 'success' | 'secondary'; label: string; icon: React.ReactNode }> = {
+  SUBMITTED: { color: 'primary', label: 'Submitted', icon: <HourglassEmptyIcon fontSize="small" /> },
+  REVIEWING: { color: 'warning', label: 'Reviewing', icon: <VisibilityIcon fontSize="small" /> },
+  SHORTLISTED: { color: 'secondary', label: 'Shortlisted', icon: <StarIcon fontSize="small" /> },
+  REJECTED: { color: 'error', label: 'Rejected', icon: <CancelIcon fontSize="small" /> },
+  ACCEPTED: { color: 'success', label: 'Accepted', icon: <CheckCircleIcon fontSize="small" /> },
+};
+
+// ─── APPLICANTS TAB ──────────────────────────────────────────────────────────
+function ApplicantsTab({ jobs, selectedCompanyId }: { jobs: JobData[]; selectedCompanyId: string | null }) {
+  const companyJobs = jobs.filter((j) => j.company?._id === selectedCompanyId);
+  const [selectedJobId, setSelectedJobId] = useState<string>(companyJobs[0]?._id || '');
+  const [applications, setApplications] = useState<JobApplicationData[]>([]);
+  const [loadingApps, setLoadingApps] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [coverPreview, setCoverPreview] = useState<{ text: string; name: string } | null>(null);
+
+  useEffect(() => {
+    if (companyJobs.length > 0 && !selectedJobId) {
+      setSelectedJobId(companyJobs[0]._id);
+    }
+  }, [companyJobs]);
+
+  useEffect(() => {
+    if (!selectedJobId) return;
+    async function fetchApps() {
+      try {
+        setLoadingApps(true);
+        const data = await applicationApi.getJobApplications(selectedJobId);
+        setApplications(data || []);
+      } catch (err) {
+        console.error('Failed to fetch applications:', err);
+        setApplications([]);
+      } finally {
+        setLoadingApps(false);
+      }
+    }
+    fetchApps();
+  }, [selectedJobId]);
+
+  const handleStatusChange = async (appId: string, newStatus: string) => {
+    try {
+      setUpdatingId(appId);
+      await applicationApi.updateApplicationStatus(appId, newStatus);
+      setApplications((prev) =>
+        prev.map((a) => (a._id === appId ? { ...a, status: newStatus as JobApplicationData['status'] } : a))
+      );
+      setSuccessMsg(`Status updated to ${newStatus}. Applicant notified via email.`);
+      setTimeout(() => setSuccessMsg(null), 4000);
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  if (companyJobs.length === 0) {
+    return (
+      <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '16px', border: '1px dashed', borderColor: 'divider' }}>
+        <PeopleAltIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+        <Typography variant="h6" fontWeight={700} color="text.secondary">
+          No job postings yet
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Post a job first to start receiving and managing applications.
+        </Typography>
+      </Paper>
+    );
+  }
+
+  const selectedJob = companyJobs.find((j) => j._id === selectedJobId);
+  const statusCounts = applications.reduce<Record<string, number>>((acc, a) => {
+    acc[a.status] = (acc[a.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  return (
+    <Stack spacing={3}>
+      {successMsg && <Alert severity="success" sx={{ borderRadius: '12px' }}>{successMsg}</Alert>}
+
+      {/* Job selector */}
+      <Box>
+        <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5 }}>Select a Job Listing</Typography>
+        <Stack direction="row" spacing={1.5} flexWrap="wrap" gap={1.5}>
+          {companyJobs.map((j) => (
+            <Chip
+              key={j._id}
+              label={j.title}
+              onClick={() => setSelectedJobId(j._id)}
+              color={selectedJobId === j._id ? 'primary' : 'default'}
+              variant={selectedJobId === j._id ? 'filled' : 'outlined'}
+              sx={{ fontWeight: 600, cursor: 'pointer' }}
+            />
+          ))}
+        </Stack>
+      </Box>
+
+      {/* Stats row */}
+      {selectedJob && (
+        <Stack direction="row" spacing={2} flexWrap="wrap" gap={1}>
+          <Paper variant="outlined" sx={{ px: 2, py: 1, borderRadius: '10px', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <PeopleAltIcon fontSize="small" color="primary" />
+            <Typography variant="body2" fontWeight={700}>{applications.length} Total Applications</Typography>
+          </Paper>
+          {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
+            statusCounts[key] ? (
+              <Chip key={key} label={`${cfg.label}: ${statusCounts[key]}`} color={cfg.color} size="small" sx={{ fontWeight: 600 }} />
+            ) : null
+          ))}
+        </Stack>
+      )}
+
+      {/* Applications list */}
+      {loadingApps ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+          <CircularProgress />
+        </Box>
+      ) : applications.length === 0 ? (
+        <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '16px', border: '1px dashed', borderColor: 'divider' }}>
+          <PeopleAltIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1.5 }} />
+          <Typography variant="body1" fontWeight={600} color="text.secondary">No applications yet for this job</Typography>
+          <Typography variant="body2" color="text.disabled" sx={{ mt: 0.5 }}>Applications will appear here as candidates apply.</Typography>
+        </Paper>
+      ) : (
+        <Stack spacing={2}>
+          {applications.map((app) => {
+            const applicant = typeof app.applicant === 'object' ? app.applicant : null;
+            const cfg = STATUS_CONFIG[app.status];
+            return (
+              <Paper
+                key={app._id}
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: '16px',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  transition: 'all 0.2s',
+                  '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.06)', borderColor: 'primary.main' },
+                }}
+              >
+                <Grid container spacing={2} alignItems="center">
+                  {/* Applicant info */}
+                  <Grid size={{ xs: 12, sm: 5 }}>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Avatar sx={{ bgcolor: 'primary.main', fontWeight: 800, width: 48, height: 48 }}>
+                        {applicant ? applicant.firstName.charAt(0) : '?'}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight={800}>
+                          {applicant ? `${applicant.firstName} ${applicant.lastName}` : 'Unknown Applicant'}
+                        </Typography>
+                        {applicant?.email && (
+                          <Typography variant="caption" color="text.secondary">{applicant.email}</Typography>
+                        )}
+                        {applicant?.phoneNumber && (
+                          <Typography variant="caption" color="text.secondary" display="block">{applicant.phoneNumber}</Typography>
+                        )}
+                        <Typography variant="caption" color="text.disabled">
+                          Applied: {new Date(app.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </Grid>
+
+                  {/* Status + Actions */}
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <Stack spacing={1}>
+                      <Chip
+                        icon={cfg?.icon as React.ReactElement}
+                        label={cfg?.label || app.status}
+                        color={cfg?.color || 'default'}
+                        size="small"
+                        sx={{ fontWeight: 700, width: 'fit-content' }}
+                      />
+                      <FormControl size="small" sx={{ minWidth: 160 }}>
+                        <InputLabel>Update Status</InputLabel>
+                        <Select
+                          value=""
+                          label="Update Status"
+                          disabled={updatingId === app._id}
+                          onChange={(e) => handleStatusChange(app._id, e.target.value)}
+                        >
+                          {['SUBMITTED', 'REVIEWING', 'SHORTLISTED', 'REJECTED', 'ACCEPTED']
+                            .filter((s) => s !== app.status)
+                            .map((s) => (
+                              <MuiSelectItem key={s} value={s}>{STATUS_CONFIG[s]?.label || s}</MuiSelectItem>
+                            ))}
+                        </Select>
+                      </FormControl>
+                    </Stack>
+                  </Grid>
+
+                  {/* Resume + Cover Letter */}
+                  <Grid size={{ xs: 12, sm: 3 }}>
+                    <Stack spacing={1}>
+                      {app.resume?.fileUrl && (
+                        <Tooltip title="Open Resume">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<OpenInNewIcon />}
+                            href={app.resume.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            sx={{ fontSize: '0.75rem' }}
+                          >
+                            View Resume
+                          </Button>
+                        </Tooltip>
+                      )}
+                      {app.coverLetter && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                          startIcon={<VisibilityIcon />}
+                          onClick={() => setCoverPreview({ text: app.coverLetter!, name: applicant ? `${applicant.firstName} ${applicant.lastName}` : 'Applicant' })}
+                          sx={{ fontSize: '0.75rem' }}
+                        >
+                          Cover Letter
+                        </Button>
+                      )}
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </Paper>
+            );
+          })}
+        </Stack>
+      )}
+
+      {/* Cover Letter Preview Dialog */}
+      <Dialog open={!!coverPreview} onClose={() => setCoverPreview(null)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 800 }}>Cover Letter — {coverPreview?.name}</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body1" sx={{ lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+            {coverPreview?.text}
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setCoverPreview(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    </Stack>
+  );
+}
+
 // ─── MAIN PORTAL PAGE ────────────────────────────────────────────────────────
 export function EmployerCompanyDashboardPage() {
+  const navigate = useNavigate();
   const [companies, setCompanies] = useState<CompanyData[]>([]);
   const [employerProfile, setEmployerProfile] = useState<EmployerProfileDetails | null>(null);
   const [userAccount, setUserAccount] = useState<UserAccountData | null>(null);
@@ -377,6 +643,21 @@ export function EmployerCompanyDashboardPage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [employerProfileDialogOpen, setEmployerProfileDialogOpen] = useState(false);
   const [benefitsDialogOpen, setBenefitsDialogOpen] = useState(false);
+  
+  const [jobs, setJobs] = useState<JobData[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
+
+  const fetchJobs = async () => {
+    try {
+      setLoadingJobs(true);
+      const data = await jobApi.getEmployerJobs();
+      setJobs(data || []);
+    } catch (err) {
+      console.error('Failed to load jobs:', err);
+    } finally {
+      setLoadingJobs(false);
+    }
+  };
 
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -390,6 +671,7 @@ export function EmployerCompanyDashboardPage() {
 
   const fetchProfileAndCompanies = async () => {
     try {
+      fetchJobs();
       const p = await profileApi.getMyProfile();
       setEmployerProfile(p.profile as never);
       setUserAccount(p.user as never);
@@ -789,6 +1071,20 @@ export function EmployerCompanyDashboardPage() {
                   <Tab icon={<CardGiftcardIcon />} iconPosition="start" label={`Benefits (${selectedCompany.benefits?.length || 0})`} />
                   <Tab icon={<CollectionsIcon />} iconPosition="start" label={`Gallery (${selectedCompany.gallery?.length || 0})`} />
                   <Tab icon={<BrushIcon />} iconPosition="start" label="Branding" />
+                  <Tab icon={<WorkIcon />} iconPosition="start" label="Job Openings" />
+                  <Tab
+                    icon={
+                      <Badge
+                        badgeContent={jobs.filter((j) => j.company?._id === selectedCompanyId).length}
+                        color="primary"
+                        max={99}
+                      >
+                        <PeopleAltIcon />
+                      </Badge>
+                    }
+                    iconPosition="start"
+                    label="Applicants"
+                  />
                 </Tabs>
 
                 <Box sx={{ p: 4 }}>
@@ -961,6 +1257,144 @@ export function EmployerCompanyDashboardPage() {
                           )}
                         </Stack>
                       </Paper>
+                    </Stack>
+                  )}
+
+                  {tabIndex === 5 && (
+                    <Stack spacing={3}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="h6" fontWeight={700}>Job Listings ({jobs.filter(j => j.company?._id === selectedCompanyId).length})</Typography>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          startIcon={<AddIcon />}
+                          onClick={() => navigate('/jobs/new')}
+                        >
+                          Post a Job
+                        </Button>
+                      </Stack>
+                      
+                      {loadingJobs ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress /></Box>
+                      ) : jobs.filter(j => j.company?._id === selectedCompanyId).length === 0 ? (
+                        <Paper sx={{ p: 4, textAlign: 'center', borderRadius: '12px', border: '1px solid', borderColor: 'divider' }}>
+                          <Typography variant="body2" color="text.secondary">No job postings found for this company.</Typography>
+                        </Paper>
+                      ) : (
+                        <Stack spacing={2}>
+                          {jobs.filter(j => j.company?._id === selectedCompanyId).map((job) => (
+                            <Paper
+                              key={job._id}
+                              sx={{
+                                p: 3,
+                                borderRadius: '12px',
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                transition: 'all 0.2s',
+                                '&:hover': { boxShadow: '0 4px 20px rgba(0,0,0,0.08)' },
+                              }}
+                            >
+                              <Grid container spacing={2} alignItems="center">
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                  <Typography variant="subtitle1" fontWeight={800}>{job.title}</Typography>
+                                  <Typography variant="caption" color="text.secondary" display="block">
+                                    {job.employmentType} • {job.remoteOption} • {job.city}, {job.country}
+                                  </Typography>
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 3 }}>
+                                  <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                                    <Chip label={job.status} size="small" color={job.status === 'PUBLISHED' ? 'success' : job.status === 'DRAFT' ? 'default' : 'warning'} />
+                                    <Chip label={`${job.totalViews} Views`} size="small" variant="outlined" />
+                                    <Chip label={`${job.totalSaves} Saves`} size="small" variant="outlined" />
+                                  </Stack>
+                                  <Button
+                                    size="small"
+                                    variant="text"
+                                    color="primary"
+                                    startIcon={<PeopleAltIcon fontSize="small" />}
+                                    onClick={() => setTabIndex(6)}
+                                    sx={{ textTransform: 'none', p: 0, fontSize: '0.75rem', fontWeight: 700 }}
+                                  >
+                                    View Applicants
+                                  </Button>
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 3 }}>
+                                  <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                                    <IconButton size="small" color="primary" onClick={() => navigate('/jobs/edit/' + job._id)} title="Edit Job">
+                                      <EditIcon fontSize="small" />
+                                    </IconButton>
+                                    <IconButton size="small" color="secondary" onClick={async () => {
+                                      try {
+                                        await jobApi.duplicateJob(job._id);
+                                        showMsg('Job listing duplicated!');
+                                        fetchJobs();
+                                      } catch {
+                                        showMsg('Failed to duplicate job listing.', 'error');
+                                      }
+                                    }} title="Duplicate Job">
+                                      <ContentCopyIcon fontSize="small" />
+                                    </IconButton>
+                                    {job.status === 'PUBLISHED' ? (
+                                      <Button size="small" variant="outlined" color="warning" onClick={async () => {
+                                        try {
+                                          await jobApi.updateJob(job._id, { status: 'CLOSED' });
+                                          showMsg('Job listing closed.');
+                                          fetchJobs();
+                                        } catch {
+                                          showMsg('Failed to close job listing.', 'error');
+                                        }
+                                      }}>
+                                        Close
+                                      </Button>
+                                    ) : job.status === 'CLOSED' || job.status === 'DRAFT' ? (
+                                      <Button size="small" variant="outlined" color="success" onClick={async () => {
+                                        try {
+                                          await jobApi.updateJob(job._id, { status: 'PUBLISHED' });
+                                          showMsg('Job listing published!');
+                                          fetchJobs();
+                                        } catch {
+                                          showMsg('Failed to publish job listing.', 'error');
+                                        }
+                                      }}>
+                                        Publish
+                                      </Button>
+                                    ) : null}
+                                    <IconButton size="small" color="error" onClick={async () => {
+                                      if (window.confirm('Are you sure you want to delete this job listing?')) {
+                                        try {
+                                          await jobApi.deleteJob(job._id);
+                                          showMsg('Job listing deleted.');
+                                          fetchJobs();
+                                        } catch {
+                                          showMsg('Failed to delete job listing.', 'error');
+                                        }
+                                      }
+                                    }} title="Delete Job">
+                                      <DeleteIcon fontSize="small" />
+                                    </IconButton>
+                                  </Stack>
+                                </Grid>
+                              </Grid>
+                            </Paper>
+                          ))}
+                        </Stack>
+                      )}
+                    </Stack>
+                  )}
+
+                  {/* TAB 6: APPLICANTS */}
+                  {tabIndex === 6 && (
+                    <Stack spacing={3}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Box>
+                          <Typography variant="h6" fontWeight={700}>Applicants Management</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Review, manage and update candidate application statuses. Applicants are notified via email on every status change.
+                          </Typography>
+                        </Box>
+                        <Chip label="📧 Email notifications enabled" color="success" size="small" sx={{ fontWeight: 600 }} />
+                      </Stack>
+                      <ApplicantsTab jobs={jobs} selectedCompanyId={selectedCompanyId} />
                     </Stack>
                   )}
                 </Box>

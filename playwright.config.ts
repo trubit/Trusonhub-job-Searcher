@@ -11,7 +11,7 @@ export default defineConfig({
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
   ],
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5175',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5180',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -23,8 +23,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev:client',
-    url: 'http://localhost:5175',
+    command: 'npx vite preview --port 5180 --config vite.config.ts',
+    url: 'http://localhost:5180',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

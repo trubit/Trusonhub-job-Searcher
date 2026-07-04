@@ -1,30 +1,46 @@
+import { Link } from 'react-router-dom';
 import { Card, CardContent, Box, Stack, Typography, Avatar, Button } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PeopleIcon from '@mui/icons-material/People';
 
 export interface CompanyCardProps {
-  id: string;
+  id?: string;
+  _id?: string;
+  slug?: string;
   name: string;
   logo?: string;
+  logoUrl?: string;
   industry: string;
-  location: string;
-  employeeCount: string;
-  openRolesCount: number;
+  location?: string;
+  headquarters?: string;
+  employeeCount?: string;
+  companySize?: string;
+  openRolesCount?: number;
 }
 
 export function CompanyCard({
+  id,
+  _id,
+  slug,
   name,
   logo,
+  logoUrl,
   industry,
   location,
+  headquarters,
   employeeCount,
-  openRolesCount,
+  companySize,
 }: CompanyCardProps) {
+  const displayLogo = logoUrl || logo;
+  const displayLocation = headquarters || location || 'Remote';
+  const displayEmployeeCount = companySize || employeeCount || '10 - 50';
+  const identifier = slug || _id || id || '';
+
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <CardContent sx={{ p: { xs: 2, sm: 3 }, flexGrow: 1, display: 'flex', flexDirection: 'column', textAlign: 'center', alignItems: 'center', minWidth: 0 }}>
         <Avatar
-          src={logo}
+          src={displayLogo}
           alt={name}
           sx={{
             width: 56,
@@ -38,7 +54,7 @@ export function CompanyCard({
             flexShrink: 0,
           }}
         >
-          {name.charAt(0)}
+          {name ? name.charAt(0) : 'C'}
         </Avatar>
 
         <Typography variant="h6" fontWeight={700} sx={{ mb: 0.5, fontSize: { xs: '1rem', sm: '1.125rem' }, overflowWrap: 'break-word', wordBreak: 'break-word', width: '100%' }}>
@@ -52,17 +68,24 @@ export function CompanyCard({
         <Stack direction="row" spacing={1.5} justifyContent="center" flexWrap="wrap" sx={{ mb: 3, width: '100%', gap: 1 }}>
           <Stack direction="row" spacing={0.5} alignItems="center" color="text.secondary">
             <LocationOnIcon sx={{ fontSize: 16 }} />
-            <Typography variant="caption">{location}</Typography>
+            <Typography variant="caption">{displayLocation}</Typography>
           </Stack>
           <Stack direction="row" spacing={0.5} alignItems="center" color="text.secondary">
             <PeopleIcon sx={{ fontSize: 16 }} />
-            <Typography variant="caption">{employeeCount}</Typography>
+            <Typography variant="caption">{displayEmployeeCount}</Typography>
           </Stack>
         </Stack>
 
         <Box sx={{ mt: 'auto', width: '100%' }}>
-          <Button fullWidth variant="outlined" color="primary" size="small">
-            View {openRolesCount} Open Jobs
+          <Button
+            fullWidth
+            variant="outlined"
+            color="primary"
+            size="small"
+            component={Link}
+            to={`/company/${identifier}`}
+          >
+            View Company Profile
           </Button>
         </Box>
       </CardContent>

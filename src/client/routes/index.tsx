@@ -6,12 +6,13 @@ import { ErrorLayout } from '../layouts/ErrorLayout';
 import { AppSpinner } from '../components/feedback/AppSpinner';
 import { PublicOnlyRoute } from '../components/routes/PublicOnlyRoute';
 import { ProtectedRoute } from '../components/routes/ProtectedRoute';
+import { AdminRoute } from '../components/routes/AdminRoute';
+import { RoleRoute } from '../components/routes/RoleRoute';
 import { useAuthStore } from '../features/auth/store/useAuthStore';
 import { authApi } from '../features/auth/services/authApi';
 
 // Lazy loaded public pages
 const LandingPage = lazy(() => import('../pages/LandingPage').then((m) => ({ default: m.LandingPage })));
-const JobsPage = lazy(() => import('../pages/JobsPage').then((m) => ({ default: m.JobsPage })));
 const CompaniesPage = lazy(() => import('../pages/CompaniesPage').then((m) => ({ default: m.CompaniesPage })));
 const PricingPage = lazy(() => import('../pages/PricingPage').then((m) => ({ default: m.PricingPage })));
 const AboutPage = lazy(() => import('../pages/AboutPage').then((m) => ({ default: m.AboutPage })));
@@ -23,6 +24,12 @@ const PublicCandidateProfilePage = lazy(() => import('../pages/PublicCandidatePr
 const PublicCompanyProfilePage = lazy(() => import('../pages/PublicCompanyProfilePage').then((m) => ({ default: m.PublicCompanyProfilePage })));
 const CandidateDashboardPage = lazy(() => import('../pages/CandidateDashboardPage').then((m) => ({ default: m.CandidateDashboardPage })));
 const EmployerCompanyDashboardPage = lazy(() => import('../pages/EmployerCompanyDashboardPage').then((m) => ({ default: m.EmployerCompanyDashboardPage })));
+const JobPostPage = lazy(() => import('../pages/JobPostPage').then((m) => ({ default: m.JobPostPage })));
+const JobSearchPage = lazy(() => import('../pages/JobSearchPage').then((m) => ({ default: m.JobSearchPage })));
+const JobDetailsPage = lazy(() => import('../pages/JobDetailsPage').then((m) => ({ default: m.JobDetailsPage })));
+const SavedJobsPage = lazy(() => import('../pages/SavedJobsPage').then((m) => ({ default: m.SavedJobsPage })));
+const ActiveSessionsPage = lazy(() => import('../pages/ActiveSessionsPage').then((m) => ({ default: m.ActiveSessionsPage })));
+const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage').then((m) => ({ default: m.AdminDashboardPage })));
 
 // Lazy loaded auth pages
 const LoginPage = lazy(() => import('../features/auth/pages/LoginPage').then((m) => ({ default: m.LoginPage })));
@@ -58,18 +65,42 @@ export function AppRoutes() {
   return (
     <Suspense fallback={<AppSpinner fullPage label="Loading Page..." />}>
       <Routes>
-        {/* Protected Dashboard Routes */}
-        <Route element={<ProtectedRoute />}>
+        {/* ── JOB SEEKER ONLY Routes ──────────────────────────────────── */}
+        <Route element={<RoleRoute allowedRoles={['JOB_SEEKER']} />}>
           <Route element={<PublicLayout />}>
             <Route path="/profile/me" element={<CandidateDashboardPage />} />
+            <Route path="/bookmarks" element={<SavedJobsPage />} />
+          </Route>
+        </Route>
+
+        {/* ── EMPLOYER / ADMIN ONLY Routes ────────────────────────────── */}
+        <Route element={<RoleRoute allowedRoles={['EMPLOYER', 'ADMIN']} />}>
+          <Route element={<PublicLayout />}>
             <Route path="/company/dashboard" element={<EmployerCompanyDashboardPage />} />
+            <Route path="/jobs/new" element={<JobPostPage />} />
+            <Route path="/jobs/edit/:id" element={<JobPostPage />} />
+          </Route>
+        </Route>
+
+        {/* ── General Authenticated Routes (any role) ──────────────────── */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<PublicLayout />}>
+            <Route path="/auth/sessions" element={<ActiveSessionsPage />} />
+          </Route>
+        </Route>
+
+        {/* Admin Protected Dashboard Routes */}
+        <Route element={<AdminRoute />}>
+          <Route element={<PublicLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           </Route>
         </Route>
 
         {/* Public Website Layout Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/jobs" element={<JobsPage />} />
+          <Route path="/jobs" element={<JobSearchPage />} />
+          <Route path="/jobs/:slug" element={<JobDetailsPage />} />
           <Route path="/companies" element={<CompaniesPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/about" element={<AboutPage />} />

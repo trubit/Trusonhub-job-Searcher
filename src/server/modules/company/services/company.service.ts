@@ -77,4 +77,8 @@ export class CompanyService {
     await company.save();
     return company;
   }
+
+  async getAllCompanies() {
+    return this.repo.findAll();
+  }
 }

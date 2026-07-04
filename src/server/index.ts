@@ -48,6 +48,10 @@ async function bootstrap(): Promise<void> {
     // Connect to database
     await connectDatabase();
 
+    // Seed default data
+    const { seedDatabase } = await import('./database/seed.js');
+    await seedDatabase();
+
     // Start HTTP server
     server.listen(env.PORT, () => {
       logger.info(`✅ Server running on port ${env.PORT}`);

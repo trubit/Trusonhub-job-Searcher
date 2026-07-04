@@ -6,7 +6,7 @@ test.describe('Authentication End-to-End User Journeys', () => {
 
     await expect(page.getByRole('heading', { name: /Welcome Back/i })).toBeVisible();
     await expect(page.getByLabel(/Email Address or Username/i)).toBeVisible();
-    await expect(page.getByLabel(/Password/i)).toBeVisible();
+    await expect(page.getByLabel(/Password/i).first()).toBeVisible();
     await expect(page.getByRole('button', { name: /Sign In/i })).toBeVisible();
   });
 

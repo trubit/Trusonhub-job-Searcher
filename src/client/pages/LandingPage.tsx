@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -10,8 +11,10 @@ import {
   Avatar,
   Card,
   CardContent,
+  CircularProgress,
+  Chip,
 } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import SearchIcon from '@mui/icons-material/Search';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import VerifiedIcon from '@mui/icons-material/Verified';
@@ -20,6 +23,10 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import DescriptionIcon from '@mui/icons-material/Description';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import StarIcon from '@mui/icons-material/Star';
+import WorkIcon from '@mui/icons-material/Work';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import PeopleIcon from '@mui/icons-material/People';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import { AppInput } from '../components/ui/AppInput';
 import { AppTag } from '../components/ui/AppTag';
 import { JobCard } from '../components/cards/JobCard';
@@ -27,107 +34,9 @@ import { CompanyCard } from '../components/cards/CompanyCard';
 import { FeatureCard } from '../components/cards/FeatureCard';
 import { SEO } from '../components/seo/SEO';
 import { fadeUp, staggerContainer, staggerItem } from '../theme/animations';
-
-const MOCK_JOBS = [
-  {
-    id: '1',
-    title: 'Senior Frontend Engineer (React / TypeScript)',
-    companyName: 'TechCorp Global',
-    location: 'San Francisco, CA (Remote)',
-    salary: '$140k - $180k',
-    jobType: 'Full-time',
-    postedDate: 'Posted 2 days ago',
-    tags: ['React', 'TypeScript', 'MUI', 'GraphQL'],
-    featured: true,
-  },
-  {
-    id: '2',
-    title: 'Staff Backend Developer (Node.js & Go)',
-    companyName: 'FinFlow Systems',
-    location: 'New York, NY (Hybrid)',
-    salary: '$160k - $200k',
-    jobType: 'Full-time',
-    postedDate: 'Posted 1 day ago',
-    tags: ['Node.js', 'TypeScript', 'MongoDB', 'Redis'],
-    featured: true,
-  },
-  {
-    id: '3',
-    title: 'Lead UI/UX Product Designer',
-    companyName: 'CreativeStudio',
-    location: 'Austin, TX (Remote)',
-    salary: '$130k - $160k',
-    jobType: 'Full-time',
-    postedDate: 'Posted 3 days ago',
-    tags: ['Figma', 'UI/UX', 'Design Systems'],
-  },
-  {
-    id: '4',
-    title: 'DevOps & Infrastructure Engineer',
-    companyName: 'CloudScale Inc',
-    location: 'Seattle, WA (Hybrid)',
-    salary: '$150k - $190k',
-    jobType: 'Full-time',
-    postedDate: 'Posted 4 days ago',
-    tags: ['Docker', 'Kubernetes', 'AWS', 'Terraform'],
-  },
-  {
-    id: '5',
-    title: 'Full Stack Engineer (MERN)',
-    companyName: 'StartupX',
-    location: 'Remote',
-    salary: '$120k - $150k',
-    jobType: 'Contract',
-    postedDate: 'Posted 5 days ago',
-    tags: ['React', 'Express', 'MongoDB', 'Node.js'],
-  },
-  {
-    id: '6',
-    title: 'AI / Machine Learning Researcher',
-    companyName: 'NeuroLabs AI',
-    location: 'Boston, MA (On-site)',
-    salary: '$180k - $240k',
-    jobType: 'Full-time',
-    postedDate: 'Posted 1 day ago',
-    tags: ['Python', 'PyTorch', 'LLMs', 'NLP'],
-    featured: true,
-  },
-];
-
-const MOCK_COMPANIES = [
-  {
-    id: 'c1',
-    name: 'TechCorp Global',
-    industry: 'Enterprise Software',
-    location: 'San Francisco, CA',
-    employeeCount: '1,000 - 5,000',
-    openRolesCount: 14,
-  },
-  {
-    id: 'c2',
-    name: 'FinFlow Systems',
-    industry: 'Fintech & Payments',
-    location: 'New York, NY',
-    employeeCount: '500 - 1,000',
-    openRolesCount: 8,
-  },
-  {
-    id: 'c3',
-    name: 'CloudScale Inc',
-    industry: 'Cloud Infrastructure',
-    location: 'Seattle, WA',
-    employeeCount: '250 - 500',
-    openRolesCount: 12,
-  },
-  {
-    id: 'c4',
-    name: 'NeuroLabs AI',
-    industry: 'Artificial Intelligence',
-    location: 'Boston, MA',
-    employeeCount: '100 - 250',
-    openRolesCount: 6,
-  },
-];
+import { jobApi, JobData } from '../features/jobs/services/jobApi';
+import { companyApi, CompanyData } from '../features/company/services/companyApi';
+import { statsApi, PlatformStats } from '../features/stats/statsApi';
 
 const BENEFITS = [
   {
@@ -157,10 +66,150 @@ const BENEFITS = [
   },
 ];
 
-const TRUSTED_LOGOS = ['Google', 'Microsoft', 'Amazon', 'Meta', 'Netflix', 'Spotify', 'Stripe'];
+// ── Animated Counter component ────────────────────────────────────────────────
+function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+
+  useEffect(() => {
+    if (!inView || target === 0) return;
+    const duration = 2000;
+    const steps = 60;
+    const increment = target / steps;
+    let current = 0;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setCount(target);
+        clearInterval(timer);
+      } else {
+        setCount(Math.floor(current));
+      }
+    }, duration / steps);
+    return () => clearInterval(timer);
+  }, [inView, target]);
+
+  return (
+    <span ref={ref}>
+      {count.toLocaleString()}{suffix}
+    </span>
+  );
+}
+
+// ── Stat Card ─────────────────────────────────────────────────────────────────
+function StatCard({
+  icon,
+  label,
+  value,
+  suffix,
+  color,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  suffix?: string;
+  color: string;
+}) {
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        p: { xs: 3, md: 4 },
+        borderRadius: '20px',
+        border: '1px solid',
+        borderColor: 'divider',
+        textAlign: 'center',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: '0 16px 48px rgba(0,0,0,0.08)',
+          borderColor: color,
+        },
+      }}
+    >
+      <Box
+        sx={{
+          width: 56,
+          height: 56,
+          borderRadius: '16px',
+          bgcolor: `${color}18`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mx: 'auto',
+          mb: 2,
+          color,
+        }}
+      >
+        {icon}
+      </Box>
+      <Typography variant="h3" fontWeight={900} sx={{ fontSize: { xs: '2rem', md: '2.5rem' }, color }}>
+        <AnimatedCounter target={value} suffix={suffix} />
+      </Typography>
+      <Typography variant="body2" color="text.secondary" fontWeight={600} sx={{ mt: 0.5 }}>
+        {label}
+      </Typography>
+    </Paper>
+  );
+}
 
 export function LandingPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const navigate = useNavigate();
+  const [keyword, setKeyword] = useState('');
+  const [location, setLocation] = useState('');
+
+  const [jobs, setJobs] = useState<JobData[]>([]);
+  const [companies, setCompanies] = useState<CompanyData[]>([]);
+  const [stats, setStats] = useState<PlatformStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadHomeData() {
+      try {
+        setLoading(true);
+        const [jobsRes, companiesRes, statsRes] = await Promise.all([
+          jobApi.searchJobs({ limit: 6 }),
+          companyApi.getAllCompanies(),
+          statsApi.getPublicStats(),
+        ]);
+        setJobs(jobsRes.jobs || []);
+        setCompanies((companiesRes || []).slice(0, 8));
+        setStats(statsRes);
+      } catch (err) {
+        console.error('Failed to load home page data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadHomeData();
+  }, []);
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (keyword.trim()) params.append('keyword', keyword.trim());
+    if (location.trim()) params.append('location', location.trim());
+    navigate(`/jobs?${params.toString()}`);
+  };
+
+  const handlePopularSearch = (term: string) => {
+    const params = new URLSearchParams();
+    if (term === 'Remote React Developer') {
+      params.append('keyword', 'React');
+      params.append('remoteOption', 'REMOTE');
+    } else if (term === 'DevOps Engineer') {
+      params.append('keyword', 'DevOps');
+    } else if (term === 'Product Manager') {
+      params.append('keyword', 'Product Manager');
+    } else if (term === 'Data Scientist') {
+      params.append('keyword', 'Data Scientist');
+    } else if (term === 'UI Designer') {
+      params.append('keyword', 'UI');
+    } else {
+      params.append('keyword', term);
+    }
+    navigate(`/jobs?${params.toString()}`);
+  };
 
   return (
     <>
@@ -195,7 +244,9 @@ export function LandingPage() {
               >
                 <StarIcon sx={{ fontSize: 16, color: 'primary.main' }} />
                 <Typography variant="caption" fontWeight={700} sx={{ fontSize: { xs: '0.75rem', sm: '0.8125rem' } }}>
-                  Over 50,000+ Active Enterprise Jobs Available
+                  {stats && stats.totalJobs > 0
+                    ? `${stats.totalJobs.toLocaleString()}+ Active Jobs Available Right Now`
+                    : 'Thousands of Active Enterprise Jobs Available'}
                 </Typography>
               </Box>
 
@@ -228,6 +279,9 @@ export function LandingPage() {
                     type="search"
                     placeholder="Job title, keywords, or company..."
                     fullWidth
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   />
                 </Box>
                 <Box sx={{ width: '100%', flex: { md: 4 } }}>
@@ -235,6 +289,9 @@ export function LandingPage() {
                     type="text"
                     placeholder="City, state, or 'Remote'"
                     fullWidth
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     InputProps={{
                       startAdornment: <LocationOnIcon color="action" sx={{ mr: 1 }} />,
                     }}
@@ -247,6 +304,7 @@ export function LandingPage() {
                     color="primary"
                     size="large"
                     startIcon={<SearchIcon />}
+                    onClick={handleSearch}
                     sx={{ height: 56, borderRadius: '12px', fontWeight: 700 }}
                   >
                     Search Jobs
@@ -265,8 +323,8 @@ export function LandingPage() {
                   <AppTag
                     key={item}
                     label={item}
-                    selected={selectedCategory === item}
-                    onClick={() => setSelectedCategory(item)}
+                    selected={false}
+                    onClick={() => handlePopularSearch(item)}
                   />
                 )
               )}
@@ -275,32 +333,69 @@ export function LandingPage() {
         </Container>
       </Box>
 
-      {/* Trusted Companies Section */}
-      <Box sx={{ py: { xs: 4, md: 6 }, borderY: '1px solid', borderColor: 'divider', bgcolor: 'background.surface' }}>
-        <Container maxWidth="lg">
-          <Typography variant="overline" display="block" textAlign="center" color="text.secondary" sx={{ mb: 3 }}>
-            Trusted by Hiring Teams at World-Class Companies
-          </Typography>
-          <Stack
-            direction="row"
-            spacing={{ xs: 2, sm: 4, md: 6 }}
-            justifyContent="center"
-            alignItems="center"
-            flexWrap="wrap"
-            gap={{ xs: 2, md: 4 }}
-          >
-            {TRUSTED_LOGOS.map((name) => (
-              <Typography
-                key={name}
-                variant="h6"
-                fontWeight={800}
-                color="text.disabled"
-                sx={{ letterSpacing: '0.05em', opacity: 0.7, fontSize: { xs: '1rem', sm: '1.25rem' } }}
-              >
-                {name}
-              </Typography>
-            ))}
-          </Stack>
+      {/* Live Platform Stats Section */}
+      <Box sx={{ py: { xs: 6, md: 10 }, bgcolor: 'background.surface' }}>
+        <Container maxWidth="xl">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}>
+            <Typography
+              variant="overline"
+              display="block"
+              textAlign="center"
+              color="text.secondary"
+              fontWeight={700}
+              sx={{ mb: 2, letterSpacing: '0.1em' }}
+            >
+              Platform Statistics
+            </Typography>
+            <Typography variant="h3" fontWeight={800} textAlign="center" sx={{ mb: 6, fontSize: { xs: '1.75rem', md: '2.5rem' } }}>
+              Trusted by Thousands Worldwide
+            </Typography>
+          </motion.div>
+
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}>
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 6, md: 3 }}>
+                <motion.div variants={staggerItem}>
+                  <StatCard
+                    icon={<WorkIcon fontSize="large" />}
+                    label="Active Job Listings"
+                    value={stats?.totalJobs ?? 0}
+                    color="#3b82f6"
+                  />
+                </motion.div>
+              </Grid>
+              <Grid size={{ xs: 6, md: 3 }}>
+                <motion.div variants={staggerItem}>
+                  <StatCard
+                    icon={<ApartmentIcon fontSize="large" />}
+                    label="Hiring Companies"
+                    value={stats?.totalCompanies ?? 0}
+                    color="#8b5cf6"
+                  />
+                </motion.div>
+              </Grid>
+              <Grid size={{ xs: 6, md: 3 }}>
+                <motion.div variants={staggerItem}>
+                  <StatCard
+                    icon={<PeopleIcon fontSize="large" />}
+                    label="Registered Candidates"
+                    value={stats?.totalCandidates ?? 0}
+                    color="#10b981"
+                  />
+                </motion.div>
+              </Grid>
+              <Grid size={{ xs: 6, md: 3 }}>
+                <motion.div variants={staggerItem}>
+                  <StatCard
+                    icon={<AssignmentIcon fontSize="large" />}
+                    label="Applications Submitted"
+                    value={stats?.totalApplications ?? 0}
+                    color="#f59e0b"
+                  />
+                </motion.div>
+              </Grid>
+            </Grid>
+          </motion.div>
         </Container>
       </Box>
 
@@ -322,26 +417,54 @@ export function LandingPage() {
                 Handpicked high-impact opportunities from verified employers.
               </Typography>
             </Box>
-            <Button variant="outlined" color="primary" sx={{ alignSelf: { xs: 'stretch', sm: 'auto' } }}>
+            <Button onClick={() => navigate('/jobs')} variant="outlined" color="primary" sx={{ alignSelf: { xs: 'stretch', sm: 'auto' } }}>
               View All Jobs
             </Button>
           </Stack>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}>
-            <Grid container spacing={3}>
-              {MOCK_JOBS.map((job) => (
-                <Grid key={job.id} size={{ xs: 12, md: 6, lg: 4 }}>
-                  <motion.div variants={staggerItem}>
-                    <JobCard {...job} />
-                  </motion.div>
-                </Grid>
-              ))}
-            </Grid>
-          </motion.div>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress />
+            </Box>
+          ) : jobs.length === 0 ? (
+            <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '16px', border: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="body1" color="text.secondary">
+                No active jobs posted yet. Check back soon!
+              </Typography>
+            </Paper>
+          ) : (
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}>
+              <Grid container spacing={3}>
+                {jobs.map((job) => {
+                  const mapped = {
+                    id: job._id,
+                    title: job.title,
+                    companyName: job.company?.name || 'Vetted Employer',
+                    companyLogo: job.company?.logoUrl,
+                    location: `${job.city}, ${job.country}`,
+                    salary: job.salaryVisibility === 'PUBLIC' && job.minimumSalary
+                      ? `$${job.minimumSalary.toLocaleString()} - $${job.maximumSalary?.toLocaleString()} ${job.currency}`
+                      : 'Negotiable',
+                    jobType: job.employmentType,
+                    postedDate: `Posted ${new Date(job.createdAt).toLocaleDateString()}`,
+                    tags: job.requiredSkills || [],
+                    featured: job.status === 'PUBLISHED',
+                  };
+                  return (
+                    <Grid key={job._id} size={{ xs: 12, md: 6, lg: 4 }}>
+                      <motion.div variants={staggerItem}>
+                        <JobCard {...mapped} />
+                      </motion.div>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </motion.div>
+          )}
         </Container>
       </Box>
 
-      {/* Featured Companies Section */}
+      {/* Real Hiring Companies Section (replaces TRUSTED_LOGOS) */}
       <Box sx={{ py: { xs: 6, md: 10 }, bgcolor: 'background.surface' }}>
         <Container maxWidth="xl">
           <Stack
@@ -359,18 +482,38 @@ export function LandingPage() {
                 Explore company cultures, benefits, and open positions.
               </Typography>
             </Box>
-            <Button variant="outlined" color="primary" sx={{ alignSelf: { xs: 'stretch', sm: 'auto' } }}>
+            <Button onClick={() => navigate('/companies')} variant="outlined" color="primary" sx={{ alignSelf: { xs: 'stretch', sm: 'auto' } }}>
               Browse Companies
             </Button>
           </Stack>
 
-          <Grid container spacing={3}>
-            {MOCK_COMPANIES.map((company) => (
-              <Grid key={company.id} size={{ xs: 12, sm: 6, md: 3 }}>
-                <CompanyCard {...company} />
-              </Grid>
-            ))}
-          </Grid>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress />
+            </Box>
+          ) : companies.length === 0 ? (
+            /* Fallback: show trusted brand names if no companies registered yet */
+            <Box sx={{ py: 4, borderY: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="overline" display="block" textAlign="center" color="text.secondary" sx={{ mb: 3 }}>
+                Trusted by Hiring Teams at World-Class Companies
+              </Typography>
+              <Stack direction="row" spacing={{ xs: 2, md: 6 }} justifyContent="center" alignItems="center" flexWrap="wrap" gap={3}>
+                {['Google', 'Microsoft', 'Amazon', 'Meta', 'Netflix', 'Spotify', 'Stripe'].map((name) => (
+                  <Typography key={name} variant="h6" fontWeight={800} color="text.disabled" sx={{ letterSpacing: '0.05em', opacity: 0.6 }}>
+                    {name}
+                  </Typography>
+                ))}
+              </Stack>
+            </Box>
+          ) : (
+            <Grid container spacing={3}>
+              {companies.map((company) => (
+                <Grid key={company._id} size={{ xs: 12, sm: 6, md: 3 }}>
+                  <CompanyCard {...company} />
+                </Grid>
+              ))}
+            </Grid>
+          )}
         </Container>
       </Box>
 
@@ -453,6 +596,48 @@ export function LandingPage() {
         </Container>
       </Box>
 
+      {/* Employer CTA Banner */}
+      <Box sx={{ py: { xs: 4, md: 6 }, bgcolor: 'background.surface', borderTop: '1px solid', borderColor: 'divider' }}>
+        <Container maxWidth="xl">
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={3}
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Box>
+              <Chip label="For Employers & HR Teams" color="secondary" size="small" sx={{ mb: 1.5, fontWeight: 700 }} />
+              <Typography variant="h5" fontWeight={800} sx={{ mb: 1 }}>
+                Ready to Hire Top Talent?
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Post your job openings and reach thousands of pre-screened, verified candidates instantly.
+              </Typography>
+            </Box>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ flexShrink: 0 }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                size="large"
+                onClick={() => navigate('/auth/register/employer')}
+                sx={{ fontWeight: 700, px: 3, py: 1.5 }}
+              >
+                Post a Job Free
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                size="large"
+                onClick={() => navigate('/pricing')}
+                sx={{ fontWeight: 700, px: 3, py: 1.5 }}
+              >
+                See Pricing Plans
+              </Button>
+            </Stack>
+          </Stack>
+        </Container>
+      </Box>
+
       {/* CTA Section */}
       <Box sx={{ py: { xs: 6, md: 10 } }}>
         <Container maxWidth="lg">
@@ -469,13 +654,13 @@ export function LandingPage() {
               Ready to Accelerate Your Career?
             </Typography>
             <Typography variant="body1" sx={{ mb: 4, maxWidth: 600, mx: 'auto', opacity: 0.9 }}>
-              Join thousands of candidates and world-class companies on TrusonHub today.
+              Join{stats && stats.totalCandidates > 0 ? ` ${stats.totalCandidates.toLocaleString()}+` : ' thousands of'} candidates and world-class companies on TrusonHub today.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
-              <Button variant="contained" size="large" sx={{ bgcolor: '#fff', color: 'primary.main', fontWeight: 700, px: 4, py: 1.5 }}>
+              <Button onClick={() => navigate('/auth/register/job-seeker')} variant="contained" size="large" sx={{ bgcolor: '#fff', color: 'primary.main', fontWeight: 700, px: 4, py: 1.5 }}>
                 Create Candidate Account
               </Button>
-              <Button variant="outlined" size="large" sx={{ borderColor: '#fff', color: '#fff', fontWeight: 700, px: 4, py: 1.5 }}>
+              <Button onClick={() => navigate('/pricing')} variant="outlined" size="large" sx={{ borderColor: '#fff', color: '#fff', fontWeight: 700, px: 4, py: 1.5 }}>
                 Post a Job
               </Button>
             </Stack>
