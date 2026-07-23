@@ -12,5 +12,5 @@ export const withdrawApplicationSchema = z.object({
   reason: z.string().max(500, 'Reason cannot exceed 500 characters').optional(),
 });
 
-export type CreateApplicationDTO = z.infer<typeof createApplicationSchema>;
-export type WithdrawApplicationDTO = z.infer<typeof withdrawApplicationSchema>;
+export type CreateApplicationDTO = z.input<typeof createApplicationSchema>;
+export type WithdrawApplicationDTO = z.input<typeof withdrawApplicationSchema>;
