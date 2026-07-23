@@ -31,6 +31,11 @@ const SavedJobsPage = lazy(() => import('../pages/SavedJobsPage').then((m) => ({
 const ActiveSessionsPage = lazy(() => import('../pages/ActiveSessionsPage').then((m) => ({ default: m.ActiveSessionsPage })));
 const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage').then((m) => ({ default: m.AdminDashboardPage })));
 
+// Lazy loaded Application & ATS pages
+const CandidateApplicationsPage = lazy(() => import('../features/applications/pages/CandidateApplicationsPage').then((m) => ({ default: m.CandidateApplicationsPage })));
+const EmployerAtsDashboardPage = lazy(() => import('../features/ats/pages/EmployerAtsDashboardPage').then((m) => ({ default: m.EmployerAtsDashboardPage })));
+const ApplicantReviewPage = lazy(() => import('../features/candidate-review/pages/ApplicantReviewPage').then((m) => ({ default: m.ApplicantReviewPage })));
+
 // Lazy loaded auth pages
 const LoginPage = lazy(() => import('../features/auth/pages/LoginPage').then((m) => ({ default: m.LoginPage })));
 const RegisterJobSeekerPage = lazy(() => import('../features/auth/pages/RegisterJobSeekerPage').then((m) => ({ default: m.RegisterJobSeekerPage })));
@@ -69,6 +74,7 @@ export function AppRoutes() {
         <Route element={<RoleRoute allowedRoles={['JOB_SEEKER']} />}>
           <Route element={<PublicLayout />}>
             <Route path="/profile/me" element={<CandidateDashboardPage />} />
+            <Route path="/applications/me" element={<CandidateApplicationsPage />} />
             <Route path="/bookmarks" element={<SavedJobsPage />} />
           </Route>
         </Route>
@@ -77,6 +83,8 @@ export function AppRoutes() {
         <Route element={<RoleRoute allowedRoles={['EMPLOYER', 'ADMIN']} />}>
           <Route element={<PublicLayout />}>
             <Route path="/company/dashboard" element={<EmployerCompanyDashboardPage />} />
+            <Route path="/employer/ats" element={<EmployerAtsDashboardPage />} />
+            <Route path="/employer/applications/:id" element={<ApplicantReviewPage />} />
             <Route path="/jobs/new" element={<JobPostPage />} />
             <Route path="/jobs/edit/:id" element={<JobPostPage />} />
           </Route>

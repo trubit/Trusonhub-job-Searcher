@@ -1,61 +1,91 @@
 import { apiClient } from '../../../services/apiClient';
 
-export interface ResumeInfo {
-  _id: string;
-  fileName: string;
-  fileUrl: string;
-  fileSizeBytes: number;
-}
-
 export interface JobApplicationData {
   _id: string;
   job: {
     _id: string;
     title: string;
-    slug: string;
+    slug?: string;
+    city: string;
+    country: string;
+    employmentType: string;
     company?: {
       name: string;
       logoUrl?: string;
-      headquarters?: string;
     };
   };
-  applicant: {
+  applicant?: {
     _id: string;
     firstName: string;
     lastName: string;
     email: string;
+    avatarUrl?: string;
+    phone?: string;
     phoneNumber?: string;
-  } | string;
-  resume: ResumeInfo;
+    location?: string;
+    headline?: string;
+  };
+  company?: {
+    _id: string;
+    name: string;
+    logoUrl?: string;
+  };
+  resume?: {
+    _id: string;
+    fileUrl?: string;
+    fileName?: string;
+    title?: string;
+  };
+  status: string;
   coverLetter?: string;
-  status: 'SUBMITTED' | 'REVIEWING' | 'SHORTLISTED' | 'REJECTED' | 'ACCEPTED';
+  resumeUrl?: string;
+  rating?: number;
+  flagged?: boolean;
+  notesCount?: number;
+  submittedAt?: string;
   createdAt: string;
 }
 
+export interface CreateApplicationPayload {
+  jobId: string;
+  resumeId?: string;
+  resumeUrl?: string;
+  coverLetter?: string;
+  isDraft?: boolean;
+}
+
 export const applicationApi = {
-  async applyToJob(jobId: string, resumeId: string, coverLetter?: string): Promise<JobApplicationData> {
-    const res = await apiClient.post<{ success: boolean; data: JobApplicationData }>('/applications', {
-      jobId,
-      resumeId,
-      coverLetter,
-    });
+  apply: async (payload: CreateApplicationPayload): Promise<JobApplicationData> => {
+    const res = await apiClient.post<{ success: boolean; data: JobApplicationData }>('/applications', payload);
     return res.data.data;
   },
 
-  async getMyApplications(): Promise<JobApplicationData[]> {
-    const res = await apiClient.get<{ success: boolean; data: JobApplicationData[] }>('/applications/my');
+  applyToJob: async (jobId: string, resumeId?: string, coverLetter?: string): Promise<JobApplicationData> => {
+    return applicationApi.apply({ jobId, resumeId, coverLetter });
+  },
+
+  getMyApplications: async (): Promise<JobApplicationData[]> => {
+    const res = await apiClient.get<{ success: boolean; data: JobApplicationData[] }>('/applications/me');
     return res.data.data;
   },
 
-  async getJobApplications(jobId: string): Promise<JobApplicationData[]> {
-    const res = await apiClient.get<{ success: boolean; data: JobApplicationData[] }>(`/applications/job/${jobId}`);
+  getJobApplications: async (_jobId?: string): Promise<JobApplicationData[]> => {
+    const res = await apiClient.get<{ success: boolean; applications: JobApplicationData[] }>('/employer/ats');
+    return res.data.applications || [];
+  },
+
+  getApplicationById: async (id: string): Promise<JobApplicationData> => {
+    const res = await apiClient.get<{ success: boolean; data: JobApplicationData }>(`/applications/${id}`);
     return res.data.data;
   },
 
-  async updateApplicationStatus(id: string, status: string): Promise<JobApplicationData> {
-    const res = await apiClient.put<{ success: boolean; data: JobApplicationData }>(`/applications/${id}/status`, {
-      status,
-    });
+  updateApplicationStatus: async (id: string, status: string): Promise<JobApplicationData> => {
+    const res = await apiClient.patch<{ success: boolean; data: JobApplicationData }>(`/employer/ats/${id}/status`, { status });
+    return res.data.data;
+  },
+
+  withdraw: async (id: string, reason?: string): Promise<JobApplicationData> => {
+    const res = await apiClient.post<{ success: boolean; data: JobApplicationData }>(`/applications/${id}/withdraw`, { reason });
     return res.data.data;
   },
 };
