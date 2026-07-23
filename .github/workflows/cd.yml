@@ -37,7 +37,7 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          target: client-builder
+          target: client-build
           push: false
           tags: talentra/client:latest,talentra/client:${{ github.sha }}
 
@@ -54,7 +54,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install Dependencies
