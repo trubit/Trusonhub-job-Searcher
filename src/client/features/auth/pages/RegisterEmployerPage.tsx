@@ -39,32 +39,30 @@ export function RegisterEmployerPage() {
 
   return (
     <>
-      <SEO title="Employer Registration — TrusonHub" />
+      <SEO title="Employer Registration — Talentra" />
 
       <Paper sx={{ p: { xs: 3, sm: 5 }, borderRadius: '24px', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
         <Stack spacing={2} textAlign="center" alignItems="center" sx={{ mb: 4 }}>
           <Box
             sx={{
-              width: 48,
-              height: 48,
-              borderRadius: '14px',
+              width: 56,
+              height: 56,
+              borderRadius: '16px',
               bgcolor: 'secondary.main',
-              color: '#fff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              color: '#fff',
             }}
           >
-            <BusinessIcon />
+            <BusinessIcon fontSize="large" />
           </Box>
-          <Box>
-            <Typography variant="h4" fontWeight={800} sx={{ mb: 0.5 }}>
-              Employer Account
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Post jobs and hire world-class talent on TrusonHub
-            </Typography>
-          </Box>
+          <Typography variant="h4" fontWeight={800}>
+            Register as an Employer
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Post jobs and hire world-class talent on Talentra
+          </Typography>
         </Stack>
 
         {errorMessage && (

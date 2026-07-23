@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('TrusonHub — Foundation smoke tests', () => {
-  test('home page loads with correct title', async ({ page }) => {
+test.describe('Talentra — Foundation smoke tests', () => {
+  test('landing page loads correctly with title and hero header', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/TrusonHub Job Searcher/);
+    await expect(page).toHaveTitle(/Talentra/);
   });
 
   test('home page displays the app heading', async ({ page }) => {

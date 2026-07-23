@@ -42,7 +42,7 @@ const RESOURCE_CATEGORIES = [
 export function CareerResourcesPage() {
   return (
     <>
-      <SEO title="Career Resources & Advice — TrusonHub Job Searcher" description="Guides, tips, and frameworks for resumes, interviews, and salary negotiation." />
+      <SEO title="Career Resources & Advice — Talentra" description="Guides, tips, and frameworks for resumes, interviews, and salary negotiation." />
 
       <Box sx={{ py: 8, bgcolor: 'background.surface', borderBottom: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
         <Container maxWidth="md">

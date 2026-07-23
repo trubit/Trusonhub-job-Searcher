@@ -3,6 +3,7 @@ import { IJob } from '../../../database/models/Job.js';
 import { Job } from '../../../database/models/Job.js';
 import { JobView } from '../../../database/models/JobView.js';
 import { AppError } from '../../../utils/AppError.js';
+import { cacheService } from '../../../services/cacheService.js';
 import crypto from 'node:crypto';
 
 export class JobService {
@@ -26,7 +27,9 @@ export class JobService {
       throw new AppError('Job title and city are required', 400);
     }
     const slug = await this.generateUniqueSlug(data.title, data.city);
-    return this.repo.create({ ...data, employer: employerId as never, slug });
+    const created = await this.repo.create({ ...data, employer: employerId as never, slug });
+    await cacheService.delPattern('job_search:*');
+    return created;
   }
 
   async updateJob(id: string, employerId: string, userRole: string, data: Partial<IJob>): Promise<IJob> {
@@ -75,7 +78,8 @@ export class JobService {
   }
 
   async searchJobs(params: JobSearchParams) {
-    return this.repo.search(params);
+    const cacheKey = `job_search:${JSON.stringify(params)}`;
+    return cacheService.remember(cacheKey, 60, () => this.repo.search(params));
   }
 
   async duplicateJob(id: string, employerId: string): Promise<IJob> {

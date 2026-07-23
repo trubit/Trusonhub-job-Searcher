@@ -68,12 +68,12 @@ export class ApplicationController {
                 <p style="margin: 0; font-size: 14px; color: #64748b;">Current Status: <strong style="color: #3b82f6;">SUBMITTED</strong></p>
                 <p style="margin: 4px 0 0; font-size: 12px; color: #94a3b8;">You will be notified when your application status changes.</p>
               </div>
-              <p style="color: #64748b; font-size: 14px;">Best of luck!<br/>The TrusonHub Team</p>
+              <p style="color: #64748b; font-size: 14px;">Best of luck!<br/>The Talentra Team</p>
             </div>
           `;
           await emailService.sendEmail({
             to: applicant.email,
-            subject: `Application Received: ${job.title} — TrusonHub`,
+            subject: `Application Received: ${job.title} — Talentra`,
             html,
           });
         }
@@ -196,12 +196,12 @@ export class ApplicationController {
                 <span style="display: inline-block; padding: 8px 20px; background: ${statusColor}; color: #fff; border-radius: 20px; font-weight: bold; font-size: 16px;">${status}</span>
                 <p style="margin: 12px 0 0; font-size: 14px; color: #64748b;">${statusMessages[status] || ''}</p>
               </div>
-              <p style="color: #64748b; font-size: 14px;">You can view your application status in your candidate dashboard.<br/>The TrusonHub Team</p>
+              <p style="color: #64748b; font-size: 14px;">You can view your application status in your candidate dashboard.<br/>The Talentra Team</p>
             </div>
           `;
           await emailService.sendEmail({
             to: applicantUser.email,
-            subject: `Application Update: ${status} — ${job.title} | TrusonHub`,
+            subject: `Application Update: ${status} — ${job.title} | Talentra`,
             html,
           });
         }

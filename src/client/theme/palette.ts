@@ -1,5 +1,5 @@
 /**
- * Full 50–900 design token palette system for TrusonHub.
+ * Full 50–900 design token palette system for Talentra.
  * Includes complete scales for Primary, Secondary, Success, Warning, Error, Info, Neutral,
  * plus Surface, Border, and Background tokens for both Light and Dark modes.
  */

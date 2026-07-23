@@ -30,7 +30,7 @@ describe('Server Authentication Utilities & Schemas', () => {
   describe('JWT Token Helper Functions', () => {
     const payload = {
       userId: 'user-123',
-      email: 'user@trusonhub.com',
+      email: 'user@talentra.com',
       role: 'JOB_SEEKER' as const,
       tokenVersion: 1,
     };

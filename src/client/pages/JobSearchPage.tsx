@@ -126,7 +126,7 @@ export function JobSearchPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 6 }}>
-      <SEO title="Find Jobs | TrusonHub" description="Search and filter thousands of job listings on TrusonHub" />
+      <SEO title="Find Jobs | Talentra" description="Search and filter thousands of job listings on Talentra" />
       
       <Typography variant="h3" fontWeight={800} sx={{ mb: 1, letterSpacing: '-1px' }}>
         Discover Your Next Opportunity

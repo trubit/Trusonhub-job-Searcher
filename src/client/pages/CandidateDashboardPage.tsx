@@ -842,7 +842,7 @@ export function CandidateDashboardPage() {
 
   return (
     <>
-      <SEO title="Candidate Profile Portal — TrusonHub" />
+      <SEO title="Candidate Profile Portal — Talentra" />
 
       {/* Invisible inputs for file upload */}
       <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handlePhotoUpload} />

@@ -5,12 +5,12 @@ services:
       context: .
       dockerfile: Dockerfile
       target: server-prod
-    container_name: trusonhub_api
+    container_name: talentra_api
     restart: unless-stopped
     env_file:
       - .env
     environment:
-      - MONGODB_URI=mongodb://mongo:27017/trusonhub_dev
+      - MONGODB_URI=mongodb://mongo:27017/talentra_dev
       - REDIS_URL=redis://redis:6379
     ports:
       - "5000:5000"
@@ -20,14 +20,14 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - trusonhub_net
+      - talentra_net
     volumes:
       - ./logs:/app/logs
 
   # ── MongoDB ─────────────────────────────────────────────────────────────
   mongo:
     image: mongo:7-jammy
-    container_name: trusonhub_mongo
+    container_name: talentra_mongo
     restart: unless-stopped
     ports:
       - "27017:27017"
@@ -35,7 +35,7 @@ services:
       - mongo_data:/data/db
       - mongo_config:/data/configdb
     networks:
-      - trusonhub_net
+      - talentra_net
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
@@ -46,7 +46,7 @@ services:
   # ── Redis ────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
-    container_name: trusonhub_redis
+    container_name: talentra_redis
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -54,7 +54,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - trusonhub_net
+      - talentra_net
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -64,7 +64,7 @@ services:
   # ── Nginx (reverse proxy + static client) ────────────────────────────────
   nginx:
     image: nginx:1.27-alpine
-    container_name: trusonhub_nginx
+    container_name: talentra_nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -74,10 +74,10 @@ services:
     depends_on:
       - api
     networks:
-      - trusonhub_net
+      - talentra_net
 
 networks:
-  trusonhub_net:
+  talentra_net:
     driver: bridge
 
 volumes:

@@ -18,7 +18,7 @@ export function ContactPage() {
 
   return (
     <>
-      <SEO title="Contact Us — TrusonHub Job Searcher" description="Get in touch with our support and enterprise sales teams." />
+      <SEO title="Contact Us — Talentra" description="Get in touch with our support and enterprise sales teams." />
 
       <Box sx={{ py: 8, textAlign: 'center', bgcolor: 'background.surface', borderBottom: '1px solid', borderColor: 'divider' }}>
         <Container maxWidth="md">
@@ -52,7 +52,7 @@ export function ContactPage() {
                     Email Support
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    support@trusonhub.com
+                    support@talentra.com
                   </Typography>
                 </Box>
               </Stack>
@@ -114,7 +114,7 @@ export function ContactPage() {
 
               {submitted ? (
                 <AppAlert severity="success" title="Message Sent Successfully!">
-                  Thank you for contacting TrusonHub. One of our support representatives will get back to you shortly.
+                  Thank you for contacting Talentra. One of our support representatives will get back to you shortly.
                 </AppAlert>
               ) : (
                 <form onSubmit={handleSubmit}>

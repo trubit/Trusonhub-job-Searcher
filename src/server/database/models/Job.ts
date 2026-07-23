@@ -243,4 +243,12 @@ const jobSchema = new Schema<IJob>(
   }
 );
 
+// High-performance compound indexes for search & filtering
+jobSchema.index({ isDeleted: 1, status: 1, visibility: 1, createdAt: -1 });
+jobSchema.index({ isDeleted: 1, company: 1, status: 1 });
+jobSchema.index({ isDeleted: 1, employer: 1 });
+jobSchema.index({ category: 1, isDeleted: 1, status: 1 });
+jobSchema.index({ country: 1, city: 1, isDeleted: 1, status: 1 });
+jobSchema.index({ title: 'text', description: 'text', requiredSkills: 'text', tags: 'text' });
+
 export const Job: Model<IJob> = model<IJob>('Job', jobSchema);

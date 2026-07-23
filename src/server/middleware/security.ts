@@ -35,9 +35,9 @@ export const corsMiddleware = cors({
     // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
 
-    const allowedOrigins = [env.CLIENT_URL];
+    const allowedOrigins = env.CLIENT_URL.split(',').map((u) => u.trim());
 
-    if (allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
       callback(null, true);
     } else {
       logger.warn(`CORS blocked request from origin: ${origin}`);

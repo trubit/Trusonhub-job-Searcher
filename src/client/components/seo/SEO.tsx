@@ -10,14 +10,14 @@ export interface SEOProps {
 }
 
 export function SEO({
-  title = 'TrusonHub Job Searcher — Find Your Next Opportunity',
-  description = 'TrusonHub Job Searcher is an enterprise job board platform connecting top talent with global employers.',
-  keywords = 'jobs, careers, employment, hiring, tech jobs, remote work, enterprise job board',
+  title = 'Talentra — Global Talent Ecosystem',
+  description = 'Talentra is an enterprise talent ecosystem connecting top-tier professionals with leading global employers.',
+  keywords = 'jobs, careers, employment, hiring, tech jobs, remote work, enterprise talent platform',
   ogImage = '/favicon.svg',
   ogType = 'website',
   canonicalUrl,
 }: SEOProps) {
-  const fullTitle = title.includes('TrusonHub') ? title : `${title} | TrusonHub Job Searcher`;
+  const fullTitle = title.includes('Talentra') ? title : `${title} | Talentra`;
 
   return (
     <Helmet>

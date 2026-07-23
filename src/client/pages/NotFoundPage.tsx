@@ -7,7 +7,7 @@ import { SEO } from '../components/seo/SEO';
 export function NotFoundPage() {
   return (
     <>
-      <SEO title="404 — Page Not Found | TrusonHub" />
+      <SEO title="404 — Page Not Found | Talentra" />
 
       <Box textAlign="center" sx={{ py: 6 }}>
         <Typography

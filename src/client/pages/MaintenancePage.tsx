@@ -5,7 +5,7 @@ import { SEO } from '../components/seo/SEO';
 export function MaintenancePage() {
   return (
     <>
-      <SEO title="System Maintenance | TrusonHub" />
+      <SEO title="System Maintenance | Talentra" />
 
       <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '24px', maxWidth: 540, mx: 'auto' }}>
         <BuildCircleIcon color="primary" sx={{ fontSize: 72, mb: 2 }} />

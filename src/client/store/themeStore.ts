@@ -30,7 +30,7 @@ export const useThemeStore = create<ThemeState>()(
       },
     }),
     {
-      name: 'trusonhub-theme',
+      name: 'talentra-theme',
       storage: createJSONStorage(() => localStorage),
     },
   ),

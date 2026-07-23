@@ -1,10 +1,10 @@
 {
-  "name": "trusonhub-job-searcher",
+  "name": "talentra",
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "description": "TrusonHub Job Searcher — Enterprise Job Board Platform",
-  "author": "TrusonHub",
+  "description": "Talentra — Enterprise Talent & Career Ecosystem",
+  "author": "Talentra",
   "license": "UNLICENSED",
   "engines": {
     "node": ">=20.0.0",

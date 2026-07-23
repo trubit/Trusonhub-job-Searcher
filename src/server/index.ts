@@ -3,6 +3,7 @@ import http from 'node:http';
 import { env } from './config/env.js';
 import { createApp } from './config/app.js';
 import { connectDatabase, disconnectDatabase } from './database/connection.js';
+import { redisManager } from './database/redisClient.js';
 import { logger } from './utils/logger.js';
 
 const app = createApp();
@@ -23,6 +24,7 @@ async function shutdown(signal: string): Promise<void> {
 
     try {
       await disconnectDatabase();
+      await redisManager.disconnect();
       logger.info('✅ Graceful shutdown complete');
       process.exit(0);
     } catch (error) {
@@ -45,8 +47,9 @@ async function bootstrap(): Promise<void> {
   try {
     logger.info(`🚀 Starting ${env.APP_NAME} [${env.APP_ENV}]`);
 
-    // Connect to database
+    // Connect to database & Redis
     await connectDatabase();
+    await redisManager.connect();
 
     // Seed default data
     const { seedDatabase } = await import('./database/seed.js');

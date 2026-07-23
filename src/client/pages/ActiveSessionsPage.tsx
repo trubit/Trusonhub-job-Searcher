@@ -92,7 +92,7 @@ export function ActiveSessionsPage() {
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
-      <SEO title="Active Sessions & Security | TrusonHub" description="Manage active login sessions for your TrusonHub account." />
+      <SEO title="Active Sessions & Security | Talentra" description="Manage active login sessions for your Talentra account." />
 
       <Button startIcon={<ArrowBackIcon />} onClick={handleBack} sx={{ mb: 4 }}>
         Back to Dashboard

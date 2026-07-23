@@ -156,4 +156,8 @@ const companySchema = new Schema<ICompany>(
   }
 );
 
+companySchema.index({ isDeleted: 1, isVerified: 1, createdAt: -1 });
+companySchema.index({ owner: 1, isDeleted: 1 });
+companySchema.index({ name: 'text', industry: 'text' });
+
 export const Company: Model<ICompany> = model<ICompany>('Company', companySchema);

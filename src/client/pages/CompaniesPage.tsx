@@ -45,7 +45,7 @@ export function CompaniesPage() {
 
   return (
     <>
-      <SEO title="Explore Hiring Companies — TrusonHub Job Searcher" description="Discover top global companies hiring now." />
+      <SEO title="Explore Hiring Companies — Talentra" description="Discover top global companies hiring now." />
 
       <Box sx={{ py: 6, bgcolor: 'background.surface', borderBottom: '1px solid', borderColor: 'divider' }}>
         <Container maxWidth="xl">

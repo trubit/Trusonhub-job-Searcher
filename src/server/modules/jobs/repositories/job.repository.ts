@@ -1,5 +1,6 @@
 import { Job, IJob } from '../../../database/models/Job.js';
 import { Types, FilterQuery } from 'mongoose';
+import { escapeRegExp } from '../../../utils/escapeRegExp.js';
 
 export interface JobSearchParams {
   keyword?: string;
@@ -69,7 +70,8 @@ export class JobRepository {
     }
 
     if (params.keyword) {
-      const keywordRegex = new RegExp(params.keyword, 'i');
+      const safeKeyword = escapeRegExp(params.keyword);
+      const keywordRegex = new RegExp(safeKeyword, 'i');
       query.$or = [
         { title: keywordRegex },
         { description: keywordRegex },
@@ -79,7 +81,8 @@ export class JobRepository {
     }
 
     if (params.location) {
-      const locationRegex = new RegExp(params.location, 'i');
+      const safeLocation = escapeRegExp(params.location);
+      const locationRegex = new RegExp(safeLocation, 'i');
       query.$and = query.$and || [];
       query.$and.push({
         $or: [

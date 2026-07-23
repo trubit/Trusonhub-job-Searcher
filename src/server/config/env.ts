@@ -6,7 +6,7 @@ import { z } from 'zod';
  */
 const envSchema = z.object({
   // Application
-  APP_NAME: z.string().min(1).default('TrusonHub Job Searcher'),
+  APP_NAME: z.string().min(1).default('Talentra'),
   APP_ENV: z.enum(['development', 'staging', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(5000),
   CLIENT_URL: z.string().url().default('http://localhost:5173'),
@@ -15,7 +15,7 @@ const envSchema = z.object({
 
   // Database
   MONGODB_URI: z.string().min(1),
-  MONGODB_DB_NAME: z.string().min(1).default('trusonhub_dev'),
+  MONGODB_DB_NAME: z.string().min(1).default('talentra_dev'),
 
   // JWT
   JWT_ACCESS_SECRET: z.string().min(16),

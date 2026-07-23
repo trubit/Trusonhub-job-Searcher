@@ -3,7 +3,6 @@ import { Drawer, Box, Stack, Typography, IconButton, Button, Divider, Avatar, Ch
 import CloseIcon from '@mui/icons-material/Close';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
-import WorkIcon from '@mui/icons-material/Work';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -11,6 +10,7 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ShieldIcon from '@mui/icons-material/Shield';
 import { NavLink } from './NavLink';
+import { Logo } from './Logo';
 import { useThemeStore } from '../../store/themeStore';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import { authApi } from '../../features/auth/services/authApi';
@@ -54,25 +54,7 @@ export function MobileDrawer({ open, onClose, navItems }: MobileDrawerProps) {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: '8px',
-              bgcolor: 'primary.main',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-            }}
-          >
-            <WorkIcon sx={{ fontSize: 18 }} />
-          </Box>
-          <Typography variant="h6" fontWeight={700}>
-            TrusonHub
-          </Typography>
-        </Stack>
+        <Logo size="small" />
         <IconButton onClick={onClose} aria-label="Close menu">
           <CloseIcon />
         </IconButton>

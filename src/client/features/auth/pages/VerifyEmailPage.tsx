@@ -38,7 +38,7 @@ export function VerifyEmailPage() {
 
   return (
     <>
-      <SEO title="Verify Email Address — TrusonHub" />
+      <SEO title="Verify Email Address — Talentra" />
 
       <Paper sx={{ p: { xs: 3, sm: 5 }, borderRadius: '24px', boxShadow: '0 8px 32px rgba(0,0,0,0.1)', textAlign: 'center' }}>
         {isLoading ? (

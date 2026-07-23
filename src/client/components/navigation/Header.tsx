@@ -19,7 +19,6 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
-import WorkIcon from '@mui/icons-material/Work';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -29,6 +28,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { NavLink } from './NavLink';
 import { MobileDrawer } from './MobileDrawer';
+import { Logo } from './Logo';
 import { useThemeStore } from '../../store/themeStore';
 import { useAuthStore } from '../../features/auth/store/useAuthStore';
 import { authApi } from '../../features/auth/services/authApi';
@@ -102,14 +102,7 @@ export function Header() {
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ height: 72, justifyContent: 'space-between' }}>
           {/* Logo */}
-          <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', gap: 1, textDecoration: 'none', color: 'text.primary' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: '10px', bgcolor: 'primary.main', color: '#fff' }}>
-              <WorkIcon fontSize="medium" />
-            </Box>
-            <Typography variant="h6" fontWeight={800} sx={{ letterSpacing: '-0.5px' }}>
-              Truson<span style={{ color: '#1976d2' }}>Hub</span>
-            </Typography>
-          </Box>
+          <Logo size="medium" />
 
           {/* Desktop Navigation Links */}
           <Stack direction="row" spacing={1} sx={{ display: { xs: 'none', md: 'flex' } }}>

@@ -60,7 +60,7 @@ export function SavedJobsPage() {
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
-      <SEO title="My Bookmarked Jobs | TrusonHub" description="View and manage your bookmarked jobs on TrusonHub" />
+      <SEO title="My Bookmarked Jobs | Talentra" description="View and manage your bookmarked jobs on Talentra" />
       
       <Button startIcon={<ArrowBackIcon />} component={Link} to="/jobs" sx={{ mb: 4 }}>
         Find More Jobs

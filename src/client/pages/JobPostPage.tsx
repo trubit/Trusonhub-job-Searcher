@@ -198,7 +198,7 @@ export function JobPostPage() {
   if (companies.length === 0) {
     return (
       <Container maxWidth="md" sx={{ py: 8 }}>
-        <SEO title="No Company Found | TrusonHub" description="Create a company first" />
+        <SEO title="No Company Found | Talentra" description="Create a company first" />
         <Alert severity="warning" variant="filled">
           You must create a Company profile before you can post a job. Go to the Employer Dashboard to setup your company profile.
         </Alert>
@@ -214,8 +214,8 @@ export function JobPostPage() {
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
       <SEO
-        title={id ? 'Edit Job Posting | TrusonHub' : 'Post a New Job | TrusonHub'}
-        description="Advertise your job opening to thousands of developers and professionals on TrusonHub."
+        title={id ? 'Edit Job Posting | Talentra' : 'Post a New Job | Talentra'}
+        description="Advertise your job opening to thousands of developers and professionals on Talentra."
       />
       <Typography variant="h4" fontWeight={800} gutterBottom>
         {id ? 'Edit Job Opening' : 'Post a New Job'}

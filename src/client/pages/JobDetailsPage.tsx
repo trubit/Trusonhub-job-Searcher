@@ -180,7 +180,7 @@ export function JobDetailsPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <SEO
-        title={`${job.title} at ${job.company?.name} | TrusonHub`}
+        title={`${job.title} at ${job.company?.name} | Talentra`}
         description={job.description.substring(0, 150)}
       />
       

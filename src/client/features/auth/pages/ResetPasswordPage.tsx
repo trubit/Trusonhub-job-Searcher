@@ -45,7 +45,7 @@ export function ResetPasswordPage() {
 
   return (
     <>
-      <SEO title="Set New Password — TrusonHub" />
+      <SEO title="Set New Password — Talentra" />
 
       <Paper sx={{ p: { xs: 3, sm: 5 }, borderRadius: '24px', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }}>
         <Stack spacing={2} textAlign="center" alignItems="center" sx={{ mb: 4 }}>

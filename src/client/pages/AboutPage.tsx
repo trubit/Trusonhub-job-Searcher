@@ -41,7 +41,7 @@ export function AboutPage() {
 
   return (
     <>
-      <SEO title="About Us — TrusonHub Job Searcher" description="Learn about our mission, vision, values, and company story." />
+      <SEO title="About Us — Talentra" description="Learn about our mission, vision, values, and company story." />
 
       <Box sx={{ py: 10, bgcolor: 'background.surface', borderBottom: '1px solid', borderColor: 'divider' }}>
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
@@ -50,7 +50,7 @@ export function AboutPage() {
             <span className="gradient-text">Transforming Hiring</span>
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ fontSize: '1.125rem', lineHeight: 1.8 }}>
-            TrusonHub is on a mission to build the world’s most transparent, efficient, and user-centric job platform.
+            Talentra is on a mission to build the world’s most transparent, efficient, and user-centric job platform.
           </Typography>
         </Container>
       </Box>

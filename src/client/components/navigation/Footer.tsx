@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Box, Container, Grid, Typography, Stack, IconButton, Divider } from '@mui/material';
-import WorkIcon from '@mui/icons-material/Work';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import FacebookIcon from '@mui/icons-material/Facebook';
+import { Logo } from './Logo';
 
 const FOOTER_SECTIONS = [
   {
@@ -72,25 +72,7 @@ export function Footer() {
           {/* Brand Column */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Stack spacing={2.5}>
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Box
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '10px',
-                    bgcolor: 'primary.main',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                  }}
-                >
-                  <WorkIcon sx={{ fontSize: 20 }} />
-                </Box>
-                <Typography variant="h6" fontWeight={800}>
-                  TrusonHub
-                </Typography>
-              </Stack>
+              <Logo size="medium" />
               <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 320, lineHeight: 1.7 }}>
                 The next-generation enterprise job board platform. Connecting world-class talent with leading global companies.
               </Typography>
@@ -154,7 +136,7 @@ export function Footer() {
           spacing={2}
         >
           <Typography variant="caption" color="text.secondary">
-            © {new Date().getFullYear()} TrusonHub Job Searcher Inc. All rights reserved.
+            © {new Date().getFullYear()} Talentra Inc. All rights reserved.
           </Typography>
           <Typography variant="caption" color="text.secondary">
             Built with React 19, Express, TypeScript & MUI.

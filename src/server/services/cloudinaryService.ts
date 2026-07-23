@@ -1,9 +1,11 @@
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
 import { env } from '../config/env.js';
 import { logger } from '../utils/logger.js';
+import { CircuitBreaker, retryWithBackoff } from '../utils/resilience.js';
 
 class CloudinaryService {
   private isConfigured = false;
+  private circuitBreaker = new CircuitBreaker('CloudinaryService', { failureThreshold: 5, resetTimeoutMs: 15000 });
 
   constructor() {
     if (env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET) {
@@ -28,28 +30,32 @@ class CloudinaryService {
       };
     }
 
-    return new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: `trusonhub/${folder}`,
-          type: 'upload',
-          access_mode: 'public',
-          transformation: [{ width: 1200, height: 1200, crop: 'limit' }, { quality: 'auto' }, { fetch_format: 'auto' }],
-        },
-        (error, result?: UploadApiResponse) => {
-          if (error || !result) {
-            logger.error('Cloudinary image upload error', { error });
-            return reject(error);
-          }
-          resolve({
-            url: result.secure_url,
-            publicId: result.public_id,
-            bytes: result.bytes,
-          });
-        }
-      );
-      uploadStream.end(fileBuffer);
-    });
+    return this.circuitBreaker.execute(() =>
+      retryWithBackoff(
+        () =>
+          new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: `talentra/${folder}`,
+                transformation: [{ width: 1200, height: 1200, crop: 'limit' }, { quality: 'auto' }, { fetch_format: 'auto' }],
+              },
+              (error, result?: UploadApiResponse) => {
+                if (error || !result) {
+                  logger.error('Cloudinary image upload error', { error });
+                  return reject(error);
+                }
+                resolve({
+                  url: result.secure_url,
+                  publicId: result.public_id,
+                  bytes: result.bytes,
+                });
+              }
+            );
+            uploadStream.end(fileBuffer);
+          }),
+        { maxRetries: 2, initialDelayMs: 300, maxDelayMs: 3000, jitter: true }
+      )
+    );
   }
 
   async uploadDocument(fileBuffer: Buffer, folder: string, fileName: string): Promise<{ url: string; publicId: string; bytes: number }> {
@@ -63,29 +69,35 @@ class CloudinaryService {
       };
     }
 
-    return new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          folder: `trusonhub/documents/${folder}`,
-          resource_type: 'raw',
-          type: 'upload',
-          access_mode: 'public',
-          public_id: `${Date.now()}_${fileName}`,
-        },
-        (error, result?: UploadApiResponse) => {
-          if (error || !result) {
-            logger.error('Cloudinary document upload error', { error });
-            return reject(error);
-          }
-          resolve({
-            url: result.secure_url,
-            publicId: result.public_id,
-            bytes: result.bytes,
-          });
-        }
-      );
-      uploadStream.end(fileBuffer);
-    });
+    return this.circuitBreaker.execute(() =>
+      retryWithBackoff(
+        () =>
+          new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: `talentra/documents/${folder}`,
+                resource_type: 'raw',
+                type: 'upload',
+                access_mode: 'public',
+                public_id: `${Date.now()}_${fileName}`,
+              },
+              (error, result?: UploadApiResponse) => {
+                if (error || !result) {
+                  logger.error('Cloudinary document upload error', { error });
+                  return reject(error);
+                }
+                resolve({
+                  url: result.secure_url,
+                  publicId: result.public_id,
+                  bytes: result.bytes,
+                });
+              }
+            );
+            uploadStream.end(fileBuffer);
+          }),
+        { maxRetries: 2, initialDelayMs: 300, maxDelayMs: 3000, jitter: true }
+      )
+    );
   }
 
   async deleteAsset(publicId: string, resourceType: 'image' | 'raw' = 'image'): Promise<void> {

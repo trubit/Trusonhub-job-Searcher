@@ -213,7 +213,7 @@ export function LandingPage() {
 
   return (
     <>
-      <SEO title="TrusonHub Job Searcher — Find Your Next Opportunity" />
+      <SEO title="Talentra — Find Your Next Career Opportunity" />
 
       {/* Hero Section */}
       <Box
@@ -522,7 +522,7 @@ export function LandingPage() {
         <Container maxWidth="xl">
           <Stack textAlign="center" alignItems="center" sx={{ mb: { xs: 5, md: 8 } }}>
             <Typography variant="h3" fontWeight={800} sx={{ mb: 2, fontSize: { xs: '1.75rem', md: '2.5rem' } }}>
-              Why Choose TrusonHub?
+              Why Choose Talentra?
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600 }}>
               Engineered for seamless career discovery and high-velocity hiring.
@@ -554,7 +554,7 @@ export function LandingPage() {
           <Grid container spacing={4}>
             {[
               {
-                quote: 'TrusonHub made my job search effortless. I applied to 5 verified tech companies and landed 3 interviews within a week!',
+                quote: 'Talentra made my job search effortless. I applied to 5 verified tech companies and landed 3 interviews within a week!',
                 name: 'Sarah Jenkins',
                 role: 'Senior Staff Engineer at Stripe',
               },
@@ -654,7 +654,7 @@ export function LandingPage() {
               Ready to Accelerate Your Career?
             </Typography>
             <Typography variant="body1" sx={{ mb: 4, maxWidth: 600, mx: 'auto', opacity: 0.9 }}>
-              Join{stats && stats.totalCandidates > 0 ? ` ${stats.totalCandidates.toLocaleString()}+` : ' thousands of'} candidates and world-class companies on TrusonHub today.
+              Join{stats && stats.totalCandidates > 0 ? ` ${stats.totalCandidates.toLocaleString()}+` : ' thousands of'} candidates and world-class companies on Talentra today.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
               <Button onClick={() => navigate('/auth/register/job-seeker')} variant="contained" size="large" sx={{ bgcolor: '#fff', color: 'primary.main', fontWeight: 700, px: 4, py: 1.5 }}>

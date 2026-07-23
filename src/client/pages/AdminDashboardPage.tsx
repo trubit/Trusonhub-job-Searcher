@@ -216,7 +216,7 @@ export function AdminDashboardPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 6 }}>
-      <SEO title="Admin Control Dashboard — TrusonHub" />
+      <SEO title="Admin Control Dashboard — Talentra" />
 
       {/* User Update Dialog */}
       <Dialog open={userDialogOpen} onClose={() => setUserDialogOpen(false)} maxWidth="xs" fullWidth>

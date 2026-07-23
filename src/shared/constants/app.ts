@@ -3,9 +3,9 @@
  */
 
 export const APP = {
-  NAME: 'TrusonHub Job Searcher',
+  NAME: 'Talentra',
   VERSION: '1.0.0',
-  DESCRIPTION: 'Enterprise job board platform',
+  DESCRIPTION: 'Enterprise talent & recruitment platform',
 } as const;
 
 export const PAGINATION = {

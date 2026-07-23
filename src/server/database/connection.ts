@@ -1,44 +1,49 @@
 import mongoose from 'mongoose';
 import { env } from '../config/env.js';
 import { logger } from '../utils/logger.js';
-
-const MAX_RETRIES = 5;
-const RETRY_DELAY_MS = 3000;
+import { retryWithBackoff } from '../utils/resilience.js';
 
 /**
  * Connect to MongoDB with retry logic.
  */
-export async function connectDatabase(retries = MAX_RETRIES): Promise<void> {
-  try {
-    await mongoose.connect(env.MONGODB_URI, {
-      dbName: env.MONGODB_DB_NAME,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    });
+export async function connectDatabase(): Promise<void> {
+  await retryWithBackoff(
+    async (attempt) => {
+      logger.info(`Attempting MongoDB connection (Attempt #${attempt})...`);
+      await mongoose.connect(env.MONGODB_URI, {
+        dbName: env.MONGODB_DB_NAME,
+        maxPoolSize: 100,
+        minPoolSize: 10,
+        maxIdleTimeMS: 30000,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+      });
 
-    logger.info(`✅ MongoDB connected: ${env.MONGODB_DB_NAME}`);
+      logger.info(`✅ MongoDB connected: ${env.MONGODB_DB_NAME}`);
 
-    mongoose.connection.on('error', (error) => {
-      logger.error('MongoDB connection error:', { error });
-    });
+      mongoose.connection.on('error', (error) => {
+        logger.error('MongoDB connection error:', { error });
+      });
 
-    mongoose.connection.on('disconnected', () => {
-      logger.warn('MongoDB disconnected — attempting reconnect...');
-    });
+      mongoose.connection.on('disconnected', () => {
+        logger.warn('MongoDB disconnected — attempting reconnect...');
+      });
 
-    mongoose.connection.on('reconnected', () => {
-      logger.info('MongoDB reconnected');
-    });
-  } catch (error) {
-    if (retries > 0) {
-      logger.warn(`MongoDB connection failed. Retrying in ${RETRY_DELAY_MS}ms... (${retries} attempts left)`);
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-      return connectDatabase(retries - 1);
+      mongoose.connection.on('reconnected', () => {
+        logger.info('MongoDB reconnected');
+      });
+    },
+    {
+      maxRetries: 5,
+      initialDelayMs: 1000,
+      maxDelayMs: 10000,
+      factor: 2,
+      jitter: true,
+      onRetry: (err, attempt, delayMs) => {
+        logger.warn(`MongoDB connection failed (Attempt #${attempt}): ${err.message}. Retrying in ${delayMs}ms with Jitter...`);
+      },
     }
-
-    logger.error('MongoDB connection failed after all retries', { error });
-    throw error;
-  }
+  );
 }
 
 /**

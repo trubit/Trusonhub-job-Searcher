@@ -65,7 +65,7 @@ export function PublicCandidateProfilePage() {
   if (error || !data) {
     return (
       <Container maxWidth="md" sx={{ py: 10, textAlign: 'center' }}>
-        <SEO title="Candidate Profile Not Found | TrusonHub" />
+        <SEO title="Candidate Profile Not Found | Talentra" />
         <Typography variant="h4" fontWeight={800} sx={{ mb: 2 }}>
           Profile Not Found
         </Typography>

@@ -58,7 +58,7 @@ export function PricingPage() {
 
   return (
     <>
-      <SEO title="Pricing & Subscription Plans — TrusonHub Job Searcher" description="Flexible pricing for job seekers and hiring employers." />
+      <SEO title="Pricing & Subscription Plans — Talentra" description="Flexible pricing for job seekers and hiring employers." />
 
       <Box sx={{ py: 8, textAlign: 'center' }}>
         <Container maxWidth="md">

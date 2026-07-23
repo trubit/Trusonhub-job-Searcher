@@ -7,7 +7,7 @@ import { SEO } from '../components/seo/SEO';
 export function ServerErrorPage() {
   return (
     <>
-      <SEO title="500 — Server Error | TrusonHub" />
+      <SEO title="500 — Server Error | Talentra" />
 
       <Box textAlign="center" sx={{ py: 6 }}>
         <Typography
