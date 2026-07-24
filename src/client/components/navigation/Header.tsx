@@ -164,6 +164,14 @@ export function Header() {
                       <ListItemIcon><BusinessIcon fontSize="small" /></ListItemIcon>
                       My Applications
                     </MenuItem>,
+                    <MenuItem key="nav-interviews-seeker" onClick={() => { handleCloseMenu(); navigate('/interviews/me'); }} sx={{ py: 1.5 }}>
+                      <ListItemIcon><BusinessIcon fontSize="small" /></ListItemIcon>
+                      My Interviews
+                    </MenuItem>,
+                    <MenuItem key="nav-offers-seeker" onClick={() => { handleCloseMenu(); navigate('/offers/me'); }} sx={{ py: 1.5 }}>
+                      <ListItemIcon><BusinessIcon fontSize="small" /></ListItemIcon>
+                      My Job Offers
+                    </MenuItem>,
                     <MenuItem key="nav-bookmarks" onClick={() => { handleCloseMenu(); navigate('/bookmarks'); }} sx={{ py: 1.5 }}>
                       <ListItemIcon><BookmarkIcon fontSize="small" /></ListItemIcon>
                       Saved Jobs
@@ -175,6 +183,14 @@ export function Header() {
                     <MenuItem key="nav-ats" onClick={() => { handleCloseMenu(); navigate('/employer/ats'); }} sx={{ py: 1.5 }}>
                       <ListItemIcon><BusinessIcon fontSize="small" color="secondary" /></ListItemIcon>
                       ATS Recruitment Workspace
+                    </MenuItem>,
+                    <MenuItem key="nav-interviews-emp" onClick={() => { handleCloseMenu(); navigate('/employer/interviews'); }} sx={{ py: 1.5 }}>
+                      <ListItemIcon><BusinessIcon fontSize="small" /></ListItemIcon>
+                      Interviews Portal
+                    </MenuItem>,
+                    <MenuItem key="nav-offers-emp" onClick={() => { handleCloseMenu(); navigate('/employer/offers'); }} sx={{ py: 1.5 }}>
+                      <ListItemIcon><BusinessIcon fontSize="small" /></ListItemIcon>
+                      Job Offers Portal
                     </MenuItem>,
                     <MenuItem key="nav-dashboard" onClick={() => { handleCloseMenu(); navigate('/company/dashboard'); }} sx={{ py: 1.5 }}>
                       <ListItemIcon><BusinessIcon fontSize="small" /></ListItemIcon>

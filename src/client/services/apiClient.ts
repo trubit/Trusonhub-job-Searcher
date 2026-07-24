@@ -49,7 +49,10 @@ const isPurelyPublicEndpoint = (url?: string) => {
     url.includes('/employer') ||
     url.includes('/admin') ||
     url.includes('/applications') ||
-    url.includes('/bookmarks')
+    url.includes('/bookmarks') ||
+    url.includes('/interviews') ||
+    url.includes('/offers') ||
+    url.includes('/hiring')
   ) {
     return false;
   }

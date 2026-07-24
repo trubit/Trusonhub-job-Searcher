@@ -35,6 +35,10 @@ const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage').then
 const CandidateApplicationsPage = lazy(() => import('../features/applications/pages/CandidateApplicationsPage').then((m) => ({ default: m.CandidateApplicationsPage })));
 const EmployerAtsDashboardPage = lazy(() => import('../features/ats/pages/EmployerAtsDashboardPage').then((m) => ({ default: m.EmployerAtsDashboardPage })));
 const ApplicantReviewPage = lazy(() => import('../features/candidate-review/pages/ApplicantReviewPage').then((m) => ({ default: m.ApplicantReviewPage })));
+const CandidateInterviewsPage = lazy(() => import('../features/interviews/pages/CandidateInterviewsPage').then((m) => ({ default: m.CandidateInterviewsPage })));
+const EmployerInterviewsPage = lazy(() => import('../features/interviews/pages/EmployerInterviewsPage').then((m) => ({ default: m.EmployerInterviewsPage })));
+const CandidateOffersPage = lazy(() => import('../features/offers/pages/CandidateOffersPage').then((m) => ({ default: m.CandidateOffersPage })));
+const EmployerOffersPage = lazy(() => import('../features/offers/pages/EmployerOffersPage').then((m) => ({ default: m.EmployerOffersPage })));
 
 // Lazy loaded auth pages
 const LoginPage = lazy(() => import('../features/auth/pages/LoginPage').then((m) => ({ default: m.LoginPage })));
@@ -71,11 +75,13 @@ export function AppRoutes() {
   return (
     <Suspense fallback={<AppSpinner fullPage label="Loading Page..." />}>
       <Routes>
-        {/* ── JOB SEEKER ONLY Routes ──────────────────────────────────── */}
+        {/* ── JOB SEEKER ONLY Routes ─────────────────────────────────────── */}
         <Route element={<RoleRoute allowedRoles={['JOB_SEEKER']} />}>
           <Route element={<PublicLayout />}>
             <Route path="/profile/me" element={<CandidateDashboardPage />} />
             <Route path="/applications/me" element={<CandidateApplicationsPage />} />
+            <Route path="/interviews/me" element={<CandidateInterviewsPage />} />
+            <Route path="/offers/me" element={<CandidateOffersPage />} />
             <Route path="/bookmarks" element={<SavedJobsPage />} />
           </Route>
         </Route>
@@ -86,6 +92,8 @@ export function AppRoutes() {
             <Route path="/company/dashboard" element={<EmployerCompanyDashboardPage />} />
             <Route path="/employer/ats" element={<EmployerAtsDashboardPage />} />
             <Route path="/employer/applications/:id" element={<ApplicantReviewPage />} />
+            <Route path="/employer/interviews" element={<EmployerInterviewsPage />} />
+            <Route path="/employer/offers" element={<EmployerOffersPage />} />
             <Route path="/jobs/new" element={<JobPostPage />} />
             <Route path="/jobs/edit/:id" element={<JobPostPage />} />
           </Route>

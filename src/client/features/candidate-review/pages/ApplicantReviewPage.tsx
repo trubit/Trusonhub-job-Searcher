@@ -19,14 +19,21 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EventIcon from '@mui/icons-material/Event';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import { useState } from 'react';
 import { useAtsApplication, useUpdateAtsStatus, useUpdateAtsRating, useToggleAtsFlag } from '../../ats/hooks/useAts';
 import { CandidateRating } from '../../candidate-rating/CandidateRating';
 import { CandidateNotes } from '../../candidate-notes/CandidateNotes';
+import { ScheduleInterviewModal } from '../../interviews/components/ScheduleInterviewModal';
+import { CreateOfferModal } from '../../offers/components/CreateOfferModal';
 import { SEO } from '../../../components/seo/SEO';
 
 export function ApplicantReviewPage() {
   const { id } = useParams<{ id: string }>();
   const { data: application, isLoading } = useAtsApplication(id || '');
+
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [offerModalOpen, setOfferModalOpen] = useState(false);
 
   const updateStatusMutation = useUpdateAtsStatus();
   const updateRatingMutation = useUpdateAtsRating();
@@ -149,9 +156,18 @@ export function ApplicantReviewPage() {
                   variant="contained"
                   color="info"
                   startIcon={<EventIcon />}
-                  onClick={() => handleStageMove('INTERVIEW_SCHEDULED')}
+                  onClick={() => setScheduleModalOpen(true)}
                 >
                   Schedule Interview
+                </Button>
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="success"
+                  startIcon={<LocalOfferIcon />}
+                  onClick={() => setOfferModalOpen(true)}
+                >
+                  Generate Offer
                 </Button>
                 <Button
                   size="small"
@@ -227,6 +243,25 @@ export function ApplicantReviewPage() {
           </Paper>
         </Grid>
       </Grid>
+
+      {scheduleModalOpen && (
+        <ScheduleInterviewModal
+          open={scheduleModalOpen}
+          onClose={() => setScheduleModalOpen(false)}
+          applicationId={application._id}
+          candidateName={`${applicant?.firstName} ${applicant?.lastName}`}
+        />
+      )}
+
+      {offerModalOpen && (
+        <CreateOfferModal
+          open={offerModalOpen}
+          onClose={() => setOfferModalOpen(false)}
+          applicationId={application._id}
+          candidateName={`${applicant?.firstName} ${applicant?.lastName}`}
+          defaultPosition={(application.job as unknown as { title?: string })?.title}
+        />
+      )}
     </Container>
   );
 }
