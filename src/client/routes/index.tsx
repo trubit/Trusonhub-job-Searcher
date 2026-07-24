@@ -53,14 +53,19 @@ export function AppRoutes() {
   const { setInitializing } = useAuthStore();
 
   useEffect(() => {
-    // Attempt silent token refresh on application load
+    const { accessToken, isAuthenticated } = useAuthStore.getState();
+    if (!isAuthenticated || !accessToken) {
+      setInitializing(false);
+      return;
+    }
+
     authApi
       .getCurrentUser()
       .then((user) => {
         useAuthStore.getState().updateUser(user);
       })
       .catch(() => {
-        // Unauthenticated or no active cookie
+        useAuthStore.getState().clearAuth();
       })
       .finally(() => {
         setInitializing(false);

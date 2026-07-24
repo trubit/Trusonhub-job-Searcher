@@ -66,6 +66,7 @@ export function Header() {
   };
 
   const handleCloseMenu = () => {
+    (document.activeElement as HTMLElement)?.blur();
     setAnchorEl(null);
   };
 
