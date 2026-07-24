@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -72,13 +73,13 @@ export function CandidateApplicationsPage() {
           </Typography>
         </Box>
         <Stack direction="row" spacing={1.5} flexWrap="wrap">
-          <Button variant="outlined" color="primary" href="/jobs">
+          <Button variant="outlined" color="primary" component={Link} to="/jobs">
             Explore Open Jobs
           </Button>
-          <Button variant="outlined" color="inherit" href="/profile/me">
+          <Button variant="outlined" color="inherit" component={Link} to="/profile/me">
             My Profile
           </Button>
-          <Button variant="outlined" color="inherit" href="/bookmarks">
+          <Button variant="outlined" color="inherit" component={Link} to="/bookmarks">
             Saved Jobs
           </Button>
         </Stack>

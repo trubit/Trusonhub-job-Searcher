@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -925,10 +925,10 @@ export function CandidateDashboardPage() {
               )}
             </Box>
             <Stack direction="row" spacing={1.5} sx={{ ml: { sm: 'auto' } }}>
-              <Button variant="contained" color="primary" href="/applications/me">
+              <Button variant="contained" color="primary" component={Link} to="/applications/me">
                 My Applications
               </Button>
-              <Button variant="outlined" color="inherit" href="/jobs">
+              <Button variant="outlined" color="inherit" component={Link} to="/jobs">
                 Browse Jobs
               </Button>
             </Stack>

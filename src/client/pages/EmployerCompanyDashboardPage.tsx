@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Box,
   Container,
@@ -938,7 +938,7 @@ export function EmployerCompanyDashboardPage() {
               </Box>
             </Stack>
             <Stack direction="row" spacing={1.5}>
-              <Button variant="contained" color="primary" href="/employer/ats">
+              <Button variant="contained" color="primary" component={Link} to="/employer/ats">
                 ATS Recruitment Pipeline
               </Button>
               <Button variant="contained" color="secondary" startIcon={<AddIcon />} onClick={handleCreateCompanyClick}>

@@ -122,10 +122,10 @@ export function EmployerAtsDashboardPage() {
           </Typography>
         </Box>
         <Stack direction="row" spacing={1.5} flexWrap="wrap">
-          <Button variant="contained" color="secondary" href="/jobs/new">
+          <Button variant="contained" color="secondary" component={Link} to="/jobs/new">
             Post New Job
           </Button>
-          <Button variant="outlined" color="inherit" href="/company/dashboard">
+          <Button variant="outlined" color="inherit" component={Link} to="/company/dashboard">
             Company Dashboard
           </Button>
         </Stack>
