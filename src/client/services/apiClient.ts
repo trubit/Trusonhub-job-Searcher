@@ -25,7 +25,8 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-const PUBLIC_PATTERNS = [
+// Endpoints that should NEVER send Authorization headers or trigger 401 silent refresh
+const PURELY_PUBLIC_PATTERNS = [
   '/stats/public',
   '/jobs/search',
   '/job-categories',
@@ -34,20 +35,24 @@ const PUBLIC_PATTERNS = [
   '/company',
   '/auth/login',
   '/auth/register',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/verify-email',
+  '/auth/resend-verification',
   '/auth/me',
   '/auth/refresh',
 ];
 
-const isPublicEndpoint = (url?: string) => {
+const isPurelyPublicEndpoint = (url?: string) => {
   if (!url) return false;
-  return PUBLIC_PATTERNS.some((pattern) => url.includes(pattern));
+  return PURELY_PUBLIC_PATTERNS.some((pattern) => url.includes(pattern));
 };
 
-// Request Interceptor: Attach Access Token from memory/persisted store
+// Request Interceptor: Attach Access Token ONLY to protected endpoints
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const accessToken = useAuthStore.getState().accessToken;
-    if (accessToken && config.headers) {
+    if (accessToken && config.headers && !isPurelyPublicEndpoint(config.url)) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
@@ -55,7 +60,7 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Silent Token Refresh on 401 & Retry for Public Requests
+// Response Interceptor: Silent Token Refresh ONLY for protected routes
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -67,21 +72,13 @@ apiClient.interceptors.response.use(
 
     const url = originalRequest.url || '';
 
-    // For public endpoints receiving 401 (e.g. invalid/expired token attached), retry once without Auth header
-    if (error.response?.status === 401 && !originalRequest._retry && isPublicEndpoint(url)) {
-      originalRequest._retry = true;
-      if (originalRequest.headers) {
-        delete originalRequest.headers.Authorization;
-      }
-      return apiClient(originalRequest);
+    // If request is purely public or an auth attempt, DO NOT attempt token refresh
+    if (isPurelyPublicEndpoint(url)) {
+      return Promise.reject(error);
     }
 
-    // Skip silent refresh for auth & public endpoints to avoid infinite loops or unnecessary errors
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      !isPublicEndpoint(url)
-    ) {
+    // Handle 401 on protected routes via silent token refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });

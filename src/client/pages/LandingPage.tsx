@@ -168,16 +168,23 @@ export function LandingPage() {
     async function loadHomeData() {
       try {
         setLoading(true);
-        const [jobsRes, companiesRes, statsRes] = await Promise.all([
+        const [jobsRes, companiesRes, statsRes] = await Promise.allSettled([
           jobApi.searchJobs({ limit: 6 }),
           companyApi.getAllCompanies(),
           statsApi.getPublicStats(),
         ]);
-        setJobs(jobsRes.jobs || []);
-        setCompanies((companiesRes || []).slice(0, 8));
-        setStats(statsRes);
-      } catch (err) {
-        console.error('Failed to load home page data:', err);
+
+        if (jobsRes.status === 'fulfilled' && jobsRes.value) {
+          setJobs(jobsRes.value.jobs || []);
+        }
+        if (companiesRes.status === 'fulfilled' && companiesRes.value) {
+          setCompanies((companiesRes.value || []).slice(0, 8));
+        }
+        if (statsRes.status === 'fulfilled' && statsRes.value) {
+          setStats(statsRes.value);
+        }
+      } catch {
+        // Fallback gracefully without console error
       } finally {
         setLoading(false);
       }
