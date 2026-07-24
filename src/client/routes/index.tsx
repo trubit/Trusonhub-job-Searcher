@@ -54,22 +54,18 @@ export function AppRoutes() {
 
   useEffect(() => {
     const { accessToken, isAuthenticated } = useAuthStore.getState();
-    if (!isAuthenticated || !accessToken) {
-      setInitializing(false);
-      return;
-    }
+    setInitializing(false);
 
-    authApi
-      .getCurrentUser()
-      .then((user) => {
-        useAuthStore.getState().updateUser(user);
-      })
-      .catch(() => {
-        useAuthStore.getState().clearAuth();
-      })
-      .finally(() => {
-        setInitializing(false);
-      });
+    if (isAuthenticated && accessToken) {
+      authApi
+        .getCurrentUser()
+        .then((user) => {
+          useAuthStore.getState().updateUser(user);
+        })
+        .catch(() => {
+          // Token expired or invalid session
+        });
+    }
   }, [setInitializing]);
 
   return (

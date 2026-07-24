@@ -25,27 +25,36 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Endpoints that should NEVER send Authorization headers or trigger 401 silent refresh
+// Endpoints that are strictly public and should NEVER send Authorization headers
 const PURELY_PUBLIC_PATTERNS = [
   '/stats/public',
   '/jobs/search',
   '/job-categories',
   '/job-locations',
   '/job-types',
-  '/company',
   '/auth/login',
   '/auth/register',
   '/auth/forgot-password',
   '/auth/reset-password',
   '/auth/verify-email',
   '/auth/resend-verification',
-  '/auth/me',
-  '/auth/refresh',
 ];
 
 const isPurelyPublicEndpoint = (url?: string) => {
   if (!url) return false;
-  return PURELY_PUBLIC_PATTERNS.some((pattern) => url.includes(pattern));
+  // Strictly protected prefixes — ALWAYS send Authorization headers
+  if (
+    url.includes('/my/') ||
+    url.includes('/me') ||
+    url.includes('/employer') ||
+    url.includes('/admin') ||
+    url.includes('/applications') ||
+    url.includes('/bookmarks')
+  ) {
+    return false;
+  }
+  // Exact path or query string matching for purely public endpoints
+  return PURELY_PUBLIC_PATTERNS.some((pattern) => url === pattern || url.startsWith(`${pattern}?`));
 };
 
 // Request Interceptor: Attach Access Token ONLY to protected endpoints
@@ -72,7 +81,7 @@ apiClient.interceptors.response.use(
 
     const url = originalRequest.url || '';
 
-    // If request is purely public or an auth attempt, DO NOT attempt token refresh
+    // If request is purely public, reject cleanly without triggering token refresh
     if (isPurelyPublicEndpoint(url)) {
       return Promise.reject(error);
     }
