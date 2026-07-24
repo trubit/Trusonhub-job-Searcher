@@ -135,6 +135,15 @@ export function MobileDrawer({ open, onClose, navItems }: MobileDrawerProps) {
                 <Button
                   fullWidth
                   variant="outlined"
+                  startIcon={<BusinessIcon />}
+                  onClick={() => handleNav('/applications/me')}
+                  sx={{ justifyContent: 'flex-start' }}
+                >
+                  My Applications
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
                   startIcon={<BookmarkIcon />}
                   onClick={() => handleNav('/bookmarks')}
                   sx={{ justifyContent: 'flex-start' }}
@@ -147,6 +156,16 @@ export function MobileDrawer({ open, onClose, navItems }: MobileDrawerProps) {
             {/* EMPLOYER quick links */}
             {(user.role === 'EMPLOYER' || user.role === 'ADMIN') && (
               <>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="secondary"
+                  startIcon={<BusinessIcon />}
+                  onClick={() => handleNav('/employer/ats')}
+                  sx={{ justifyContent: 'flex-start' }}
+                >
+                  ATS Recruitment Workspace
+                </Button>
                 <Button
                   fullWidth
                   variant="outlined"

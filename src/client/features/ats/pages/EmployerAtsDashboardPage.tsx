@@ -112,13 +112,23 @@ export function EmployerAtsDashboardPage() {
     <Container maxWidth="xl" sx={{ py: 6 }}>
       <SEO title="Applicant Tracking System (ATS) | Talentra" description="Manage candidates across recruitment stages" />
 
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" fontWeight={800} gutterBottom>
-          Applicant Tracking System
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Evaluate, organize, and transition job candidates through your recruitment pipeline.
-        </Typography>
+      <Box sx={{ mb: 4, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { sm: 'center' }, gap: 2 }}>
+        <Box>
+          <Typography variant="h3" fontWeight={800} gutterBottom>
+            Applicant Tracking System
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Evaluate, organize, and transition job candidates through your recruitment pipeline.
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1.5} flexWrap="wrap">
+          <Button variant="contained" color="secondary" href="/jobs/new">
+            Post New Job
+          </Button>
+          <Button variant="outlined" color="inherit" href="/company/dashboard">
+            Company Dashboard
+          </Button>
+        </Stack>
       </Box>
 
       {/* Stage Metrics Cards */}

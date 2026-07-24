@@ -924,6 +924,14 @@ export function CandidateDashboardPage() {
                 </Typography>
               )}
             </Box>
+            <Stack direction="row" spacing={1.5} sx={{ ml: { sm: 'auto' } }}>
+              <Button variant="contained" color="primary" href="/applications/me">
+                My Applications
+              </Button>
+              <Button variant="outlined" color="inherit" href="/jobs">
+                Browse Jobs
+              </Button>
+            </Stack>
           </Stack>
         </Container>
       </Box>

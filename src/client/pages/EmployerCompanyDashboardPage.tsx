@@ -937,9 +937,14 @@ export function EmployerCompanyDashboardPage() {
                 <Typography variant="body1" color="text.secondary">Branding, culture, office photos, benefits, and team dashboard</Typography>
               </Box>
             </Stack>
-            <Button variant="contained" color="secondary" startIcon={<AddIcon />} onClick={handleCreateCompanyClick}>
-              Add Company
-            </Button>
+            <Stack direction="row" spacing={1.5}>
+              <Button variant="contained" color="primary" href="/employer/ats">
+                ATS Recruitment Pipeline
+              </Button>
+              <Button variant="contained" color="secondary" startIcon={<AddIcon />} onClick={handleCreateCompanyClick}>
+                Add Company
+              </Button>
+            </Stack>
           </Stack>
         </Container>
       </Box>

@@ -62,13 +62,26 @@ export function CandidateApplicationsPage() {
     <Container maxWidth="xl" sx={{ py: 6 }}>
       <SEO title="My Applications | Talentra" description="Track your submitted job applications" />
 
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" fontWeight={800} gutterBottom>
-          My Applications
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Track the status and timeline of all your submitted job applications.
-        </Typography>
+      <Box sx={{ mb: 4, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { sm: 'center' }, gap: 2 }}>
+        <Box>
+          <Typography variant="h3" fontWeight={800} gutterBottom>
+            My Applications
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Track the status and timeline of all your submitted job applications.
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1.5} flexWrap="wrap">
+          <Button variant="outlined" color="primary" href="/jobs">
+            Explore Open Jobs
+          </Button>
+          <Button variant="outlined" color="inherit" href="/profile/me">
+            My Profile
+          </Button>
+          <Button variant="outlined" color="inherit" href="/bookmarks">
+            Saved Jobs
+          </Button>
+        </Stack>
       </Box>
 
       {isLoading ? (

@@ -158,6 +158,10 @@ export function Header() {
                       <ListItemIcon><AccountCircleIcon fontSize="small" /></ListItemIcon>
                       My Profile & Dashboard
                     </MenuItem>,
+                    <MenuItem key="nav-applications" onClick={() => { handleCloseMenu(); navigate('/applications/me'); }} sx={{ py: 1.5 }}>
+                      <ListItemIcon><BusinessIcon fontSize="small" /></ListItemIcon>
+                      My Applications
+                    </MenuItem>,
                     <MenuItem key="nav-bookmarks" onClick={() => { handleCloseMenu(); navigate('/bookmarks'); }} sx={{ py: 1.5 }}>
                       <ListItemIcon><BookmarkIcon fontSize="small" /></ListItemIcon>
                       Saved Jobs
@@ -166,6 +170,10 @@ export function Header() {
 
                   {/* EMPLOYER menu items */}
                   {(user.role === 'EMPLOYER' || user.role === 'ADMIN') && [
+                    <MenuItem key="nav-ats" onClick={() => { handleCloseMenu(); navigate('/employer/ats'); }} sx={{ py: 1.5 }}>
+                      <ListItemIcon><BusinessIcon fontSize="small" color="secondary" /></ListItemIcon>
+                      ATS Recruitment Workspace
+                    </MenuItem>,
                     <MenuItem key="nav-dashboard" onClick={() => { handleCloseMenu(); navigate('/company/dashboard'); }} sx={{ py: 1.5 }}>
                       <ListItemIcon><BusinessIcon fontSize="small" /></ListItemIcon>
                       Company Dashboard
