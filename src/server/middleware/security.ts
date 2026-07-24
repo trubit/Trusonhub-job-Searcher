@@ -36,8 +36,13 @@ export const corsMiddleware = cors({
     if (!origin) return callback(null, true);
 
     const allowedOrigins = env.CLIENT_URL.split(',').map((u) => u.trim());
+    const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
 
-    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+    if (
+      allowedOrigins.includes(origin) ||
+      allowedOrigins.includes('*') ||
+      (env.APP_ENV === 'development' && isLocalhost)
+    ) {
       callback(null, true);
     } else {
       logger.warn(`CORS blocked request from origin: ${origin}`);
