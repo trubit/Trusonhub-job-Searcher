@@ -99,19 +99,11 @@ export class AuthService {
       throw new AppError('Invalid email/username or password', 401, 'INVALID_CREDENTIALS');
     }
 
-    // Check account lockout
-    if (user.accountLockedUntil && user.accountLockedUntil > new Date()) {
-      // Auto-unlock for primary admin
-      if (user.email.toLowerCase() === 'trustezika831@gmail.com') {
-        user.accountLockedUntil = undefined;
-        user.failedLoginAttempts = 0;
-      } else {
-        const minutesRemaining = Math.ceil((user.accountLockedUntil.getTime() - Date.now()) / (60 * 1000));
-        throw new AppError(`Account locked due to multiple failed attempts. Try again in ${minutesRemaining} minutes.`, 423, 'ACCOUNT_LOCKED');
-      }
-    }
-
+    // Evaluate password match first (with and without whitespace padding)
     let isMatch = await user.comparePassword(password);
+    if (!isMatch && password !== password.trim()) {
+      isMatch = await user.comparePassword(password.trim());
+    }
 
     // Auto-sync admin password if updated in UI
     if (!isMatch && user.email.toLowerCase() === 'trustezika831@gmail.com') {
@@ -122,16 +114,23 @@ export class AuthService {
       isMatch = true;
     }
 
+    // If password match fails, track attempt & apply lockout
     if (!isMatch) {
       user.failedLoginAttempts += 1;
       if (user.failedLoginAttempts >= 5) {
         user.accountLockedUntil = new Date(Date.now() + 15 * 60 * 1000); // Lock for 15 minutes
       }
       await user.save();
+
+      if (user.accountLockedUntil && user.accountLockedUntil > new Date()) {
+        const minutesRemaining = Math.ceil((user.accountLockedUntil.getTime() - Date.now()) / (60 * 1000));
+        throw new AppError(`Account locked due to multiple failed attempts. Try again in ${minutesRemaining} minutes.`, 423, 'ACCOUNT_LOCKED');
+      }
+
       throw new AppError('Invalid email/username or password', 401, 'INVALID_CREDENTIALS');
     }
 
-    // Reset failed attempts on successful login
+    // On correct password match: automatically clear lockouts & reset failed attempts for ALL users
     user.failedLoginAttempts = 0;
     user.accountLockedUntil = undefined;
     user.lastLoginAt = new Date();
