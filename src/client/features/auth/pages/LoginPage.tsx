@@ -27,7 +27,7 @@ export function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setErrorMessage(null);
-      const res = await authApi.login(data);
+      const res = await authApi.login({ ...data, emailOrUsername: data.emailOrUsername.trim() });
       setAuth(res.data.user, res.data.accessToken);
       navigate('/');
     } catch (err: unknown) {

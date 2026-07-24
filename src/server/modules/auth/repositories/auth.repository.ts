@@ -15,7 +15,7 @@ export class AuthRepository {
   }
 
   async findUserByEmailOrUsername(identifier: string): Promise<IUser | null> {
-    const clean = identifier.toLowerCase();
+    const clean = identifier.trim().toLowerCase();
     return User.findOne({
       $or: [{ email: clean }, { username: clean }],
       isDeleted: false,
