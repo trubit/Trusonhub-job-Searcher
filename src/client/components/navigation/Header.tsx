@@ -129,6 +129,7 @@ export function Header() {
                 </IconButton>
 
                 <Menu
+                  disableRestoreFocus
                   anchorEl={anchorEl}
                   open={Boolean(anchorEl)}
                   onClose={handleCloseMenu}

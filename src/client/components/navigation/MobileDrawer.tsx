@@ -46,6 +46,7 @@ export function MobileDrawer({ open, onClose, navItems }: MobileDrawerProps) {
 
   return (
     <Drawer
+      disableRestoreFocus
       anchor="right"
       open={open}
       onClose={onClose}
