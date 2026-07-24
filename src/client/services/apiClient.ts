@@ -25,7 +25,25 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-// Request Interceptor: Attach Access Token from memory store
+const PUBLIC_PATTERNS = [
+  '/stats/public',
+  '/jobs/search',
+  '/job-categories',
+  '/job-locations',
+  '/job-types',
+  '/company',
+  '/auth/login',
+  '/auth/register',
+  '/auth/me',
+  '/auth/refresh',
+];
+
+const isPublicEndpoint = (url?: string) => {
+  if (!url) return false;
+  return PUBLIC_PATTERNS.some((pattern) => url.includes(pattern));
+};
+
+// Request Interceptor: Attach Access Token from memory/persisted store
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const accessToken = useAuthStore.getState().accessToken;
@@ -37,21 +55,32 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Silent Token Refresh on 401
+// Response Interceptor: Silent Token Refresh on 401 & Retry for Public Requests
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // Skip refresh logic for auth endpoints themselves to avoid infinite loops
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
+    const url = originalRequest.url || '';
+
+    // For public endpoints receiving 401 (e.g. invalid/expired token attached), retry once without Auth header
+    if (error.response?.status === 401 && !originalRequest._retry && isPublicEndpoint(url)) {
+      originalRequest._retry = true;
+      if (originalRequest.headers) {
+        delete originalRequest.headers.Authorization;
+      }
+      return apiClient(originalRequest);
+    }
+
+    // Skip silent refresh for auth & public endpoints to avoid infinite loops or unnecessary errors
     if (
       error.response?.status === 401 &&
-      originalRequest &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes('/auth/login') &&
-      !originalRequest.url?.includes('/auth/register') &&
-      !originalRequest.url?.includes('/auth/me') &&
-      !originalRequest.url?.includes('/auth/refresh')
+      !isPublicEndpoint(url)
     ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
